@@ -2,15 +2,15 @@ html
     script(src='http://localhost:3000/static/login.js')
     head
         h1 Login
-    body(onload="hello()")   
-        div
-            form#inputForm
-                label Username 
-                br
-                input(type="text")#usernameInput
-                br
-                label Password
-                br
-                input(type="text")#passwordInput
-                br
-                input(type="submit")#submitButton
+    body
+        p
+            label(for="inputUsername") Username
+            br
+            input(type="text" title="username")#inputUsername
+        p
+            label(for="inputPassword") Password  
+            br
+            input(type="text")#inputPassword
+        p
+            a(href="http://localhost:3000/hub")
+                button submit

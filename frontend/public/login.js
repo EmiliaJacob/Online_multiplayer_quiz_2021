@@ -1,3 +1,10 @@
 function hello() {
-    alert("clicked");
+    alert("hello");
+}
+
+function changeSites() {
+    fetch('http://localhost:3000/hub')
+    .then (()=> {
+        alert("done");
+    });
 }
