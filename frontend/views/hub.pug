@@ -1,8 +1,9 @@
+include mixins/_topBar
+
 html 
     head 
+        +topBar()
         h1 Hub
     body 
-        button(type="button") Find Game
-        button(type="button") Logout
-        
-        
+        a(href="http://localhost:3000/game")
+            button(type="button") Find Game

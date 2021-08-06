@@ -1,10 +1,14 @@
+include mixins/_topBar
+
 html    
     script(src="../../scripts/countdown.js")
     head 
+        +topBar()
         h1 Game running 
     body 
         p#countdown 
             input(type="submit" value="Start Timer")#startTimer
         p#question 
             h2 question?
-
+        a(href="http://localhost:3000/hub")
+            button(type="button") Quit Game 
