@@ -31,7 +31,7 @@ app.post('/register',  (req,res) => {
         // headers is an object with all response headers
         // status is statusCode number
        // }
-        testing({data, headers, status}, userInfo, res)
+        testing({data, headers, status}, userInfo, res) // Ik this is bad code 
         , err => {
         // either request error occured
         // ...or err.code=EDOCMISSING if document is missing
@@ -53,7 +53,8 @@ app.post('/register',  (req,res) => {
 function testing({data, headers, status}, userInfo, res) {
     console.log("USERINFO" + JSON.stringify(userInfo));
     console.log("mango result: " + JSON.stringify(data));
-    if(data.docs.length != 0) { // Check if username already exists
+    console.log("DOCS LENGHT: " + data.docs.length);
+    if(data.docs.length == 0) { // Check if username already exists
         res.json({answer:"userName already exists"});
         return;
     }
