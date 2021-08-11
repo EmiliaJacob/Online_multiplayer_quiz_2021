@@ -14,7 +14,7 @@ const couch = new NodeCouchDb({ // See the default values at https://www.npmjs.c
         }
 });
 
-app.post('/register',  (req,res) => {
+app.post('/register',  (req,res) => { // TODO: You can also make (req,res) async. This might help in refactoring
     var userInfo = req.body;
 
     if(userInfo.userName && userInfo.password) { // Check if required fields are part of request
@@ -50,6 +50,10 @@ app.post('/register',  (req,res) => {
     //check if user already exists
 });
 	 
+app.post('/login', (req,res) => { // TODO: Automatically redirect to 'register' if user doesn't exist
+
+})
+
 function testing({data, headers, status}, userInfo, res) {
     if(data.docs.length == 0) { // Check if username already exists
         res.json({answer:"userName already exists"});
@@ -73,6 +77,7 @@ async function addUser(userName, password) { // Create new user in DB
         userName: JSON.stringify(userName),
         password: JSON.stringify(password)
     }).then(({data, headers, status}) => {
+        console.log("input: " + JSON.stringify(userName)+" "+JSON.stringify(password));
         console.log("sucessfully created a new user: " + JSON.stringify(data));
        // console.log(JSON.stringify(data));
         // data is json response
