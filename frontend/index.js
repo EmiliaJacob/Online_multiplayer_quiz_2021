@@ -18,6 +18,10 @@ app.get('/game', async(req,res) => {
     res.render('game');
 })
 
+app.get('/mqttTest', async(req,res) => {
+    res.render('mqtt_test');
+})
+
 app.listen(port, () => {
     console.log('listening on port: ' + port);
 });
