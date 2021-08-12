@@ -28,6 +28,7 @@ function onMessageArrived(msg) {
     console.log("received message: " + msg.payloadString);
     
     if(msg.payloadString == "Found match") {
+        client.disconnect();
         document.location.href = "http://localhost:3000/game";
     }
     else {
