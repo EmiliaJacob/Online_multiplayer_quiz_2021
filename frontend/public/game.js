@@ -1,26 +1,32 @@
 // MQTT Ablauf
 // Client stellt Verbindung her und teilt mit, dass er dem Spiel joint
 // Server sendet Frage und Timer and Client
+var timerRunning = false;
 
 function startCountdown(countdownTime) {
-    //var countdownTime = 10;
-    var countdownVisualisation = document.getElementById("countdown");
+        //var countdownTime = 10;
+        if(!timerRunning) {
+        var countdownVisualisation = document.getElementById("countdown");
+        var intervalId = setInterval(secondExpired, 1000);
+        timerRunning = true;
 
-    var intervalId = setInterval(secondExpired, 1000);
-    function secondExpired() {
-        if(countdownTime < 0) {
-            clearInterval(intervalId);
-            countdownVisualisation.innerHTML = "Round over";
-        } 
-        else {
-            countdownVisualisation.innerHTML = countdownTime.toString();
-            countdownTime -= 1;
+        function secondExpired() {
+            if(countdownTime < 0) {
+                clearInterval(intervalId);
+                timerRunning = false;
+                countdownVisualisation.innerHTML = "Round over";
+            } 
+            else {
+                countdownVisualisation.innerHTML = countdownTime.toString();
+                countdownTime -= 1;
+            }
         }
     }
 }
 
 
 window.onload = function() {
+    timerRunning = false;
     init();
 }
 
@@ -48,6 +54,10 @@ function onMessageArrived(msg) {
 function onConnectionSuccess() {
     console.log("sucessfully connected");
     client.subscribe("quiz/match/#");
+
+    let message = new Paho.MQTT.Message("Client x joined match");
+    message.destinationName = "quiz/match";
+    client.send(message);
 }
 
 function onConnectionFailure(err) {
