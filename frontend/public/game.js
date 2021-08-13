@@ -14,6 +14,7 @@ function startCountdown(countdownTime) {
             if(countdownTime < 0) {
                 clearInterval(intervalId);
                 timerRunning = false;
+                roundOver();
                 countdownVisualisation.innerHTML = "Round over";
             } 
             else {
@@ -63,4 +64,23 @@ function onConnectionSuccess() {
 function onConnectionFailure(err) {
     console.log("connection failure: " + err);
     setTimeout(init, 2000);
+}
+
+function roundOver() {
+    console.log("round over");
+
+    var answer = "none";
+    if(document.getElementById("answerA").checked) {
+        answer = "a";
+    } else if (document.getElementById("answerB").checked) {
+        answer = "b"
+    } else if (document.getElementById("answerC").checked) {
+        answer = "c"
+    } else if (document.getElementById("answerD").checked) {
+        answer = "d"
+    }
+
+    let message = new Paho.MQTT.Message("client x answered: " + answer);
+    message.destinationName = "quiz/match";
+    client.send(message);
 }

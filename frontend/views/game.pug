@@ -10,16 +10,16 @@ html
         p#countdown 
         p#question 
             h2 What is 5 + 3?
-            input(type="checkbox" value="a")#answerA
+            input(type="radio" value="a" name="options")#answerA
             label(for="answerA") A:   44
             br
-            input(type="checkbox" value="b")#answerB
+            input(type="radio" value="b" name="options")#answerB
             label(for="answerB") B:   87
             br
-            input(type="checkbox" value="c")#answerC
+            input(type="radio" value="c" name="options")#answerC
             label(for="answerC") C:   11
             br
-            input(type="checkbox" value="d")#answerD
+            input(type="radio" value="d" name="options")#answerD
             label(for="answerD") D:    8
         a(href="http://localhost:3000/hub")
             button(type="button") Quit Game 
