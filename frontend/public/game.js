@@ -50,6 +50,15 @@ function onMessageArrived(msg) {
             startCountdown(convertedMsg);
         }
     }
+
+    if(msg.destinationName == "quiz/match/questions") {
+        try {
+            questions = JSON.parse(msg.payloadString);
+            setQuestions(questions);
+        } catch (err) {
+            console.log("payload is no proper JSON");
+        }
+    }
 }
 
 function onConnectionSuccess() {
@@ -83,4 +92,11 @@ function roundOver() {
     let message = new Paho.MQTT.Message("client x answered: " + answer);
     message.destinationName = "quiz/match";
     client.send(message);
+}
+
+function setQuestions(questions) {
+    document.getElementById("questionA").innerHTML = JSON.stringify(questions.a);
+    document.getElementById("questionB").innerHTML = JSON.stringify(questions.b);
+    document.getElementById("questionC").innerHTML = JSON.stringify(questions.c);
+    document.getElementById("questionD").innerHTML = JSON.stringify(questions.d);
 }
