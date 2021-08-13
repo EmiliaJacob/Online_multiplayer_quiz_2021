@@ -1,7 +1,5 @@
 var client;
 
-// TODO: Make the client disconnect at the end
-
 window.onload = function() {
     init();
     document.getElementById("findGame").addEventListener("click", () => {
@@ -21,7 +19,6 @@ function init() {
         {onSuccess: onConnectionSuccess},
         {onFailure: onConnectionFailure}
     )
-
 }
 
 function onMessageArrived(msg) {
