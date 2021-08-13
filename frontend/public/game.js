@@ -2,6 +2,7 @@
 // Client stellt Verbindung her und teilt mit, dass er dem Spiel joint
 // Server sendet Frage und Timer and Client
 var timerRunning = false;
+var isGameMaster = false;
 
 function startCountdown(countdownTime) {
         //var countdownTime = 10;
@@ -14,7 +15,8 @@ function startCountdown(countdownTime) {
             if(countdownTime < 0) {
                 clearInterval(intervalId);
                 timerRunning = false;
-                roundOver();
+                if(!isGameMaster)
+                    roundOver();
                 countdownVisualisation.innerHTML = "Round over";
             } 
             else {
@@ -28,6 +30,7 @@ function startCountdown(countdownTime) {
 
 window.onload = function() {
     timerRunning = false;
+    setToPlayerView();
     init();
 }
 
@@ -52,12 +55,17 @@ function onMessageArrived(msg) {
     }
 
     if(msg.destinationName == "quiz/match/questions") {
+        var questions = null;
+
         try {
             questions = JSON.parse(msg.payloadString);
-            setQuestions(questions);
         } catch (err) {
             console.log("payload is no proper JSON");
+            console.log(msg.payloadString);
         }
+
+        if(questions) 
+            setQuestions(questions);
     }
 }
 
@@ -95,8 +103,35 @@ function roundOver() {
 }
 
 function setQuestions(questions) {
-    document.getElementById("questionA").innerHTML = JSON.stringify(questions.a);
-    document.getElementById("questionB").innerHTML = JSON.stringify(questions.b);
-    document.getElementById("questionC").innerHTML = JSON.stringify(questions.c);
-    document.getElementById("questionD").innerHTML = JSON.stringify(questions.d);
+    document.getElementById("questionA").innerHTML = "A: " + JSON.stringify(questions.a);
+    document.getElementById("questionB").innerHTML = "B: " + JSON.stringify(questions.b);
+    document.getElementById("questionC").innerHTML = "C: " + JSON.stringify(questions.c);
+    document.getElementById("questionD").innerHTML = "D: " + JSON.stringify(questions.d);
 }
+
+function changeToGameMasterView() {
+}
+
+function setToPlayerView() {
+    var chars = "abcd";
+    var questionParagraph = document.getElementById("question");
+
+    for(i=0; i<4; i++) {
+        let choice = document.createElement("input");
+        choice.id = "answer" + chars.charAt(i);
+        choice.type = "radio";
+        choice.name = "choices";
+        questionParagraph.appendChild(choice);
+
+        let label = document.createElement("label");
+        label.for = choice.id;
+        label.id = "question" + chars.charAt(i).toUpperCase();
+        label.innerHTML = "placeholder";
+        //console.log(label.id);
+        questionParagraph.appendChild(label);
+
+        let br = document.createElement("br");
+        questionParagraph.appendChild(br);
+    }
+}
+
