@@ -27,10 +27,9 @@ function startCountdown(countdownTime) {
     }
 }
 
-
 window.onload = function() {
     timerRunning = false;
-    setToPlayerView();
+    //setToPlayerView();
     init();
 }
 
@@ -66,6 +65,19 @@ function onMessageArrived(msg) {
 
         if(questions) 
             setQuestions(questions);
+    }
+
+    if(msg.destinationName == "quiz/match/setRoles") {
+        if(msg.payloadString == "player"){
+            //client.unsubscribe("quiz/match/player"); // TODO: Make the order of subscriptions more detailed
+            //client.subscribe("quiz/match/gameMaster");
+            setToPlayerView();
+        } 
+        if(msg.payloadString == "gameMaster") {
+            client.subscribe("quiz/match/player"); // TODO: Make the order of subscriptions more detailed
+            client.unsubscribe("quiz/match/gameMaster");
+            setToGameMasterView();
+        }
     }
 }
 
@@ -109,12 +121,17 @@ function setQuestions(questions) {
     document.getElementById("questionD").innerHTML = "D: " + JSON.stringify(questions.d);
 }
 
-function changeToGameMasterView() {
+function setToGameMasterView() {
+    console.log("   LDSKFSHHHHHHHHHHHHHHHHHHHHH");
+    var questionParagraph = document.getElementById("question");
+    //questionParagraph.innerHTML = '';
 }
 
 function setToPlayerView() {
     var chars = "abcd";
     var questionParagraph = document.getElementById("question");
+    console.log("HIIII");
+
 
     for(i=0; i<4; i++) {
         let choice = document.createElement("input");
@@ -127,11 +144,10 @@ function setToPlayerView() {
         label.for = choice.id;
         label.id = "question" + chars.charAt(i).toUpperCase();
         label.innerHTML = "placeholder";
-        //console.log(label.id);
+        console.log(label.id);
         questionParagraph.appendChild(label);
 
         let br = document.createElement("br");
         questionParagraph.appendChild(br);
     }
 }
-
