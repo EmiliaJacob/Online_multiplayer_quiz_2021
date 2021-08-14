@@ -114,24 +114,29 @@ function roundOver() {
     client.send(message);
 }
 
-function setQuestions(questions) {
-    document.getElementById("questionA").innerHTML = "A: " + JSON.stringify(questions.a);
-    document.getElementById("questionB").innerHTML = "B: " + JSON.stringify(questions.b);
-    document.getElementById("questionC").innerHTML = "C: " + JSON.stringify(questions.c);
-    document.getElementById("questionD").innerHTML = "D: " + JSON.stringify(questions.d);
+function setQuestions(question) {
+    document.getElementById("questionDisplay").innerHTML = "Question: " + JSON.stringify(question.text);
+    document.getElementById("questionA").innerHTML = "A: " + JSON.stringify(question.a);
+    document.getElementById("questionB").innerHTML = "B: " + JSON.stringify(question.b);
+    document.getElementById("questionC").innerHTML = "C: " + JSON.stringify(question.c);
+    document.getElementById("questionD").innerHTML = "D: " + JSON.stringify(question.d);
 }
 
 function setToGameMasterView() {
     console.log("   LDSKFSHHHHHHHHHHHHHHHHHHHHH");
     var questionParagraph = document.getElementById("question");
-    //questionParagraph.innerHTML = '';
+    questionParagraph.innerHTML = '';
 }
 
 function setToPlayerView() {
     var chars = "abcd";
-    var questionParagraph = document.getElementById("question");
-    console.log("HIIII");
 
+    var questionParagraph = document.getElementById("question");
+
+    var questionDisplay = document.createElement("h2");
+    questionDisplay.id = "questionDisplay";
+    questionDisplay.innerHTML = "Question: Placeholder";
+    questionParagraph.appendChild(questionDisplay);
 
     for(i=0; i<4; i++) {
         let choice = document.createElement("input");
@@ -144,7 +149,6 @@ function setToPlayerView() {
         label.for = choice.id;
         label.id = "question" + chars.charAt(i).toUpperCase();
         label.innerHTML = "placeholder";
-        console.log(label.id);
         questionParagraph.appendChild(label);
 
         let br = document.createElement("br");
