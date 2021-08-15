@@ -3,10 +3,10 @@
 // Server sendet Frage und Timer and Client
 var timerRunning = false;
 var isGameMaster = false;
+var currentRole;
 
 function startCountdown(countdownTime) {
-        //var countdownTime = 10;
-        if(!timerRunning) {
+    if(!timerRunning) {
         var countdownVisualisation = document.getElementById("countdown");
         var intervalId = setInterval(secondExpired, 1000);
         timerRunning = true;
@@ -29,13 +29,13 @@ function startCountdown(countdownTime) {
 
 window.onload = function() {
     timerRunning = false;
-    //setToPlayerView();
     init();
 }
 
 function init() {
     client = new Paho.MQTT.Client("localhost", 8080, "/mqtt/", "quizMatchClient");
     client.onMessageArrived = onMessageArrived;
+    client.onMessageDelivered = onMessageDelivered;
 
     client.connect(
         {onSuccess: onConnectionSuccess},
@@ -67,27 +67,52 @@ function onMessageArrived(msg) {
             setQuestions(questions);
     }
 
-    if(msg.destinationName == "quiz/match/setRoles") {
-        if(msg.payloadString == "player"){
-            //client.unsubscribe("quiz/match/player"); // TODO: Make the order of subscriptions more detailed
-            //client.subscribe("quiz/match/gameMaster");
+    if(msg.destinationName == "quiz/match/roles") {
+        if(msg.payloadString == "player"){ // TODO: Add check for username so that you know what role is yours
             setToPlayerView();
-        } 
+            subscribe("quiz/match/players", () => {
+                publishMessage(0, "quiz/match/status", "sucessfully subscribed to players");
+            })
+        } // TODO: Add on Success and on Failure to other subscriptions as well
         if(msg.payloadString == "gameMaster") {
-            client.subscribe("quiz/match/player"); // TODO: Make the order of subscriptions more detailed
-            client.unsubscribe("quiz/match/gameMaster");
             setToGameMasterView();
+            subscribe("quiz/match/gameMaster", () => {
+                publishMessage(0, "quiz/match/status", "sucessfully subscribed to gameMaster");
+            })
         }
     }
+}
+
+function subscribe(topic, onSuccess) {
+    client.subscribe(topic, {
+        onSuccess: onSuccess,
+        onFailure: function(err) {
+            console.log("Couldn't subscribe to topic: " + JSON.stringify(err.errorMessage));
+            setTimeout(2000, subscribe(topic, onSuccess));
+        }
+    });
+}
+
+function publishMessage(qos, destination, payload) {
+    try {
+        let message = new Paho.MQTT.Message(payload);
+        message.destinationName = destination;
+        message.qos = qos;
+        client.send(message)
+    } catch  {
+        console.log("client is not connected");
+    }
+}
+
+function onMessageDelivered(msg) {
+    console.log("message has delivered: " + msg.payloadString);
 }
 
 function onConnectionSuccess() {
     console.log("sucessfully connected");
     client.subscribe("quiz/match/#");
 
-    let message = new Paho.MQTT.Message("Client x joined match");
-    message.destinationName = "quiz/match";
-    client.send(message);
+    publishMessage(0, "quiz/server", "Client x joined match");
 }
 
 function onConnectionFailure(err) {
@@ -109,9 +134,7 @@ function roundOver() {
         answer = "d"
     }
 
-    let message = new Paho.MQTT.Message("client x answered: " + answer);
-    message.destinationName = "quiz/match";
-    client.send(message);
+    publishMessage(0, "quiz/match", "client x answered: " + answer);
 }
 
 function setQuestions(question) {
@@ -123,9 +146,13 @@ function setQuestions(question) {
 }
 
 function setToGameMasterView() {
-    console.log("   LDSKFSHHHHHHHHHHHHHHHHHHHHH");
     var questionParagraph = document.getElementById("question");
     questionParagraph.innerHTML = '';
+    
+    var header = document.createElement("h2");
+    header.id = "questionDisplay";
+    header.innerHTML = "Please select a question: ";
+    questionParagraph.appendChild(header);
 }
 
 function setToPlayerView() {
