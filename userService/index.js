@@ -1,6 +1,7 @@
 const { json } = require('express');
 const express = require('express');
 const bodyParser = require('body-parser');
+const bcrypt = require('bcryptjs');
 const app= express();
 const port = 3001;
 const NodeCouchDb = require('node-couchdb');
@@ -50,9 +51,15 @@ app.post('/register',  (req,res) => { // TODO: You can also make (req,res) async
     //check if user already exists
 });
 	 
-app.post('/login', (req,res) => { // TODO: Automatically redirect to 'register' if user doesn't exist
-
+app.post('/login', async (req,res) => { // TODO: Automatically redirect to 'register' if user doesn't exist
+    // compare pwds: 
+    var isValidPw = await bcrypt.compare(req.body.password);
 })
+
+async function getPasswordHash(password) {
+    let salt = await bcrypt.genSalt(10);
+    return await bcrypt.hash(password, salt);
+}
 
 function testing({data, headers, status}, userInfo, res) {
     if(data.docs.length == 0) { // Check if username already exists
@@ -71,11 +78,13 @@ app.listen(port, () => {
 })
 
 async function addUser(userName, password) { // Create new user in DB
-    let uuid = await couch.uniqid(); // yes, this could be done way easier 
+    var uuid = await couch.uniqid(); // yes, this could be done way easier 
+    var pwHash = await getPasswordHash(JSON.stringify(password));
+
     couch.insert("users", {
         _id: uuid[0],
         userName: JSON.stringify(userName),
-        password: JSON.stringify(password)
+        password: pwHash
     }).then(({data, headers, status}) => {
         console.log("input: " + JSON.stringify(userName)+" "+JSON.stringify(password));
         console.log("sucessfully created a new user: " + JSON.stringify(data));
