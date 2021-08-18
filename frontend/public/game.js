@@ -1,6 +1,3 @@
-// MQTT Ablauf
-// Client stellt Verbindung her und teilt mit, dass er dem Spiel joint
-// Server sendet Frage und Timer and Client
 var timerRunning = false;
 var isGameMaster = false;
 var currentRole;
@@ -73,7 +70,7 @@ function onMessageArrived(msg) {
             subscribe("quiz/match/players", () => {
                 publishMessage(0, "quiz/match/status", "sucessfully subscribed to players");
             })
-        } // TODO: Add on Success and on Failure to other subscriptions as well
+        }
         if(msg.payloadString == "gameMaster") {
             setToGameMasterView();
             subscribe("quiz/match/gameMaster", () => {
@@ -81,6 +78,10 @@ function onMessageArrived(msg) {
             })
         }
     }
+}
+
+function onMessageDelivered(msg) {
+    console.log("message has delivered: " + msg.payloadString);
 }
 
 function subscribe(topic, onSuccess) {
@@ -104,45 +105,16 @@ function publishMessage(qos, destination, payload) {
     }
 }
 
-function onMessageDelivered(msg) {
-    console.log("message has delivered: " + msg.payloadString);
-}
-
 function onConnectionSuccess() {
     console.log("sucessfully connected");
-    client.subscribe("quiz/match/#");
-
-    publishMessage(0, "quiz/server", "Client x joined match");
+    subscribe("quiz/match/#", () => {
+        publishMessage(0, "quiz/match/status", "Client ready");
+    });
 }
 
 function onConnectionFailure(err) {
     console.log("connection failure: " + err);
     setTimeout(init, 2000);
-}
-
-function roundOver() {
-    console.log("round over");
-
-    var answer = "none";
-    if(document.getElementById("answerA").checked) {
-        answer = "a";
-    } else if (document.getElementById("answerB").checked) {
-        answer = "b"
-    } else if (document.getElementById("answerC").checked) {
-        answer = "c"
-    } else if (document.getElementById("answerD").checked) {
-        answer = "d"
-    }
-
-    publishMessage(0, "quiz/match", "client x answered: " + answer);
-}
-
-function setQuestions(question) {
-    document.getElementById("questionDisplay").innerHTML = "Question: " + JSON.stringify(question.text);
-    document.getElementById("questionA").innerHTML = "A: " + JSON.stringify(question.a);
-    document.getElementById("questionB").innerHTML = "B: " + JSON.stringify(question.b);
-    document.getElementById("questionC").innerHTML = "C: " + JSON.stringify(question.c);
-    document.getElementById("questionD").innerHTML = "D: " + JSON.stringify(question.d);
 }
 
 function setToGameMasterView() {
@@ -181,4 +153,29 @@ function setToPlayerView() {
         let br = document.createElement("br");
         questionParagraph.appendChild(br);
     }
+}
+
+function setQuestions(question) {
+    document.getElementById("questionDisplay").innerHTML = "Question: " + JSON.stringify(question.text);
+    document.getElementById("questionA").innerHTML = "A: " + JSON.stringify(question.a);
+    document.getElementById("questionB").innerHTML = "B: " + JSON.stringify(question.b);
+    document.getElementById("questionC").innerHTML = "C: " + JSON.stringify(question.c);
+    document.getElementById("questionD").innerHTML = "D: " + JSON.stringify(question.d);
+}
+
+function roundOver() {
+    console.log("round over");
+
+    var answer = "none";
+    if(document.getElementById("answerA").checked) {
+        answer = "a";
+    } else if (document.getElementById("answerB").checked) {
+        answer = "b"
+    } else if (document.getElementById("answerC").checked) {
+        answer = "c"
+    } else if (document.getElementById("answerD").checked) {
+        answer = "d"
+    }
+
+    publishMessage(0, "quiz/match", "client x answered: " + answer);
 }
