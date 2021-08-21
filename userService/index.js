@@ -21,7 +21,7 @@ app.post('/register',  async (req,res) => { // TODO: You can also make (req,res)
         return;
     }
     
-    if(await checkIfUserNameExists(req.body.userName) == false) {
+    if(await getUserFromDB(req.body.userName) == null) {
         addUser(req.body.userName, req.body.password);
         res.json({answer:"new username"});
         return;
@@ -39,12 +39,13 @@ app.post('/login', async (req,res) => { // TODO: Automatically redirect to 'regi
                 return;            
         }
 
-        if(await checkIfUserNameExists(req.body.userName) == false) { // Check if username exists
+        if(await getUserFromDB(req.body.userName) == null) { // Check if username exists
             res.json({response:"user doesn't exist"});
             return;
         }
         
         var plaintextPw = JSON.stringify(req.body.password);
+        //var hashedPw = await 
         //bcrypt.compare(plaintextPw, 
 });
 
@@ -57,21 +58,21 @@ app.listen(port, () => {
     console.log('listening on port: ' + port);
 })
 
-async function checkIfUserNameExists(userName) {
-        let mangoQuery = { // TODO: Create Index
-            selector: {
-                "userName": {
-                    "$eq": JSON.stringify(userName)
-                }
+async function getUserFromDB (userName) {
+    let mangoQuery = { // TODO: Create Index
+        selector: {
+            "userName": {
+                "$eq": JSON.stringify(userName)
             }
-        };
+        }
+    };
 
-        var queryResult = await couch.mango("users", mangoQuery, {});
-        
-        if(queryResult.data.docs.length == 0) 
-            return false;
-        else
-            return true;
+    var queryResult = await couch.mango("users", mangoQuery, {});
+    console.log(JSON.stringify(queryResult.data.docs));
+    if(queryResult.data.docs.length == 0) 
+        return null;
+    else
+        return queryResult.data.docs[0];
 }
 
 async function addUser(userName, password) { // Create new user in DB
