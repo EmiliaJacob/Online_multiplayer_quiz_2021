@@ -1,6 +1,6 @@
-const { json } = require('express');
+const { json } = require('express'); // TODO: What is this?
 const express = require('express');
-const bodyParser = require('body-parser');
+const bodyParser = require('body-parser'); // TODO: stop using bodyparser
 const bcrypt = require('bcryptjs');
 const app= express();
 const port = 3001;
@@ -10,51 +10,67 @@ app.use(express.json());
 
 const couch = new NodeCouchDb({ // See the default values at https://www.npmjs.com/package/node-couchdb
         auth: {
-            user:'admin',
-            password: 'password'
+            user:'ibs',
+            password: '1234'
         }
 });
 
-app.post('/register',  (req,res) => { // TODO: You can also make (req,res) async. This might help in refactoring
-    var userInfo = req.body;
-
-    if(userInfo.userName && userInfo.password) { // Check if required fields are part of request
-        let mangoQuery = { // TODO: Create Index
-            selector: {
-                "userName": {
-                    "$eq": userInfo.userName
-                }
-            }
-        };
-
-        couch.mango("users", mangoQuery, {}).then(({data, headers, status}) => 
-        // data is json response
-        // headers is an object with all response headers
-        // status is statusCode number
-       // }
-        testing({data, headers, status}, userInfo, res) // Ik this is bad code 
-        , err => {
-        // either request error occured
-        // ...or err.code=EDOCMISSING if document is missing
-        // ...or err.code=EUNKNOWN if statusCode is unexpected
-            console.log("mango error: " + err);
-        });
-    }
-    else {
-        res.json({answer:"data has wrong format"});
+app.post('/register',  async (req,res) => { // TODO: You can also make (req,res) async. This might help in refactoring
+    if(!req.body.userName || !req.body.password) { // Check if required fields are part of request
+        res.json({answer:"unexpexted body"});
         return;
     }
-        
-    console.log("recieved following data: " + JSON.stringify(userInfo));
-    //res.json({answer:"recieved register request"});
-    //couch.createDatabase("test_database").then(() => {console.log("database created")}, err => {console.log("error: " + err)});
-    //check if user already exists
+    
+    let mangoQuery = { // TODO: Create Index
+        selector: {
+            "userName": {
+                "$eq": JSON.stringify(req.body.userName)
+            }
+        }
+    };
+
+    var queryResult = await couch.mango("users", mangoQuery, {});
+
+    if(queryResult.err) { // TODO: Add error handling
+        console.log("Couldn't perform Mango query");
+        return;
+    }
+    if(queryResult.data.docs.length == 0) {
+        addUser(req.body.userName, req.body.password);
+        res.json({answer:"new username"});
+        return;
+    }
+    else {
+        res.json({answer:"user already exists"});
+        return;            
+    }
 });
 	 
 app.post('/login', async (req,res) => { // TODO: Automatically redirect to 'register' if user doesn't exist
     // compare pwds: 
-    var isValidPw = await bcrypt.compare(req.body.password);
-})
+        if(!req.body.password || !req.body.userName) { // Check if correct JSON is sent
+                res.json({answer:"unexpected body"});
+                return;            
+        }
+
+        let mangoQuery = { // TODO: Create Index
+            selector: {
+                "userName": {
+                    "$eq": JSON.stringify(req.body.userName)
+                }
+            }
+        };
+
+        var queryResult = await couch.mango("users", mangoQuery, {});
+        
+        if(queryResult.data.docs.length == 0) { // Check if username exists
+            res.json({response:"user doesn't exist"});
+            return;
+        }
+        
+        var plaintextPw = JSON.stringify(req.body.password);
+        //bcrypt.compare(plaintextPw, 
+});
 
 async function getPasswordHash(password) {
     let salt = await bcrypt.genSalt(10);
@@ -63,12 +79,12 @@ async function getPasswordHash(password) {
 
 function testing({data, headers, status}, userInfo, res) {
     if(data.docs.length == 0) { // Check if username already exists
-        res.json({answer:"userName already exists"});
+        addUser(userInfo.userName, userInfo.password);
+        res.json({answer:"new username"});
         return;
     }
     else {
-        addUser(userInfo.userName, userInfo.password);
-        res.json({answer:"new username"});
+        res.json({answer:"userName already exists"});
         return;
     }
 }
