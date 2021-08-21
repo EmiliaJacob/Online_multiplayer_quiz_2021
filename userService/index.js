@@ -21,21 +21,7 @@ app.post('/register',  async (req,res) => { // TODO: You can also make (req,res)
         return;
     }
     
-    let mangoQuery = { // TODO: Create Index
-        selector: {
-            "userName": {
-                "$eq": JSON.stringify(req.body.userName)
-            }
-        }
-    };
-
-    var queryResult = await couch.mango("users", mangoQuery, {});
-
-    if(queryResult.err) { // TODO: Add error handling
-        console.log("Couldn't perform Mango query");
-        return;
-    }
-    if(queryResult.data.docs.length == 0) {
+    if(await checkIfUserNameExists(req.body.userName) == false) {
         addUser(req.body.userName, req.body.password);
         res.json({answer:"new username"});
         return;
@@ -53,17 +39,7 @@ app.post('/login', async (req,res) => { // TODO: Automatically redirect to 'regi
                 return;            
         }
 
-        let mangoQuery = { // TODO: Create Index
-            selector: {
-                "userName": {
-                    "$eq": JSON.stringify(req.body.userName)
-                }
-            }
-        };
-
-        var queryResult = await couch.mango("users", mangoQuery, {});
-        
-        if(queryResult.data.docs.length == 0) { // Check if username exists
+        if(await checkIfUserNameExists(req.body.userName) == false) { // Check if username exists
             res.json({response:"user doesn't exist"});
             return;
         }
@@ -77,21 +53,26 @@ async function getPasswordHash(password) {
     return await bcrypt.hash(password, salt);
 }
 
-function testing({data, headers, status}, userInfo, res) {
-    if(data.docs.length == 0) { // Check if username already exists
-        addUser(userInfo.userName, userInfo.password);
-        res.json({answer:"new username"});
-        return;
-    }
-    else {
-        res.json({answer:"userName already exists"});
-        return;
-    }
-}
-
 app.listen(port, () => {
     console.log('listening on port: ' + port);
 })
+
+async function checkIfUserNameExists(userName) {
+        let mangoQuery = { // TODO: Create Index
+            selector: {
+                "userName": {
+                    "$eq": JSON.stringify(userName)
+                }
+            }
+        };
+
+        var queryResult = await couch.mango("users", mangoQuery, {});
+        
+        if(queryResult.data.docs.length == 0) 
+            return false;
+        else
+            return true;
+}
 
 async function addUser(userName, password) { // Create new user in DB
     var uuid = await couch.uniqid(); // yes, this could be done way easier 
