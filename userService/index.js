@@ -2,6 +2,7 @@ const { json } = require('express'); // TODO: What is this?
 const express = require('express');
 const bodyParser = require('body-parser'); // TODO: stop using bodyparser
 const bcrypt = require('bcryptjs');
+const saltRounds = 10;
 const app= express();
 const port = 3001;
 const NodeCouchDb = require('node-couchdb');
@@ -39,18 +40,29 @@ app.post('/login', async (req,res) => { // TODO: Automatically redirect to 'regi
                 return;            
         }
 
-        if(await getUserFromDB(req.body.userName) == null) { // Check if username exists
+        var user = await getUserFromDB(req.body.userName);
+
+        if(user == null) { // Check if username exists
             res.json({response:"user doesn't exist"});
             return;
         }
         
-        var plaintextPw = JSON.stringify(req.body.password);
-        //var hashedPw = await 
-        //bcrypt.compare(plaintextPw, 
+        bcrypt.compare(req.body.password, user.password, function(err, result) {
+            if(err) {
+                console.log(result);
+                res.json({response: "error"}); // TODO: make one central error return
+            }
+            else {
+                if(result == true)
+                    res.json({response: "sucessfully logged in"});
+                else 
+                    res.json({response: "wrong pw"});
+            }
+        });
 });
 
 async function getPasswordHash(password) {
-    let salt = await bcrypt.genSalt(10);
+    let salt = await bcrypt.genSalt(saltRounds);
     return await bcrypt.hash(password, salt);
 }
 
@@ -68,7 +80,7 @@ async function getUserFromDB (userName) {
     };
 
     var queryResult = await couch.mango("users", mangoQuery, {});
-    console.log(JSON.stringify(queryResult.data.docs));
+
     if(queryResult.data.docs.length == 0) 
         return null;
     else
@@ -77,15 +89,18 @@ async function getUserFromDB (userName) {
 
 async function addUser(userName, password) { // Create new user in DB
     var uuid = await couch.uniqid(); // yes, this could be done way easier 
-    var pwHash = await getPasswordHash(JSON.stringify(password));
+    var salt = await bcrypt.genSalt(saltRounds);
+    var hashedPw = await bcrypt.hash(password, salt);
 
+    console.log("clear text pw: " + password);
+    console.log("salt: " + salt);
+    console.log("hashed pw: " + hashedPw);
+    
     couch.insert("users", {
-        _id: uuid[0],
+        _id: uuid[0], // TODO: is ID necessary? 
         userName: JSON.stringify(userName),
-        password: pwHash
+        password: hashedPw
     }).then(({data, headers, status}) => {
-        console.log("input: " + JSON.stringify(userName)+" "+JSON.stringify(password));
-        console.log("sucessfully created a new user: " + JSON.stringify(data));
        // console.log(JSON.stringify(data));
         // data is json response
         // headers is an object with all response headers
