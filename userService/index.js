@@ -6,6 +6,7 @@ const saltRounds = 10;
 const app= express();
 const port = 3001;
 const NodeCouchDb = require('node-couchdb');
+const jwt = require('jsonwebtoken');
 
 app.use(express.json());
 
@@ -23,14 +24,14 @@ app.post('/register',  async (req,res) => { // TODO: You can also make (req,res)
     }
     
     if(await getUserFromDB(req.body.userName) == null) {
-        addUser(req.body.userName, req.body.password);
-        res.json({answer:"new username"});
-        return;
+        await addUser(req.body.userName, req.body.password);
+        let user = await getUserFromDB(req.body.userName);
+        let rand = require('crypto').randomBytes(64).toString('hex');
+        let accessToken = jwt.sign(user, rand);
+        res.json(accessToken);
     }
-    else {
-        res.json({answer:"user already exists"});
-        return;            
-    }
+    else 
+        res.json({answer:"username is already taken"});
 });
 	 
 app.post('/login', async (req,res) => { // TODO: Automatically redirect to 'register' if user doesn't exist
@@ -53,10 +54,13 @@ app.post('/login', async (req,res) => { // TODO: Automatically redirect to 'regi
                 res.json({response: "error"}); // TODO: make one central error return
             }
             else {
-                if(result == true)
-                    res.json({response: "sucessfully logged in"});
+                if(result == true) {
+                    var rand = require('crypto').randomBytes(64).toString('hex');
+                    var accessToken = jwt.sign(user, rand);
+                    res.json(accessToken);
+                }
                 else 
-                    res.json({response: "wrong pw"});
+                    res.json({response: "sucessfully logged in"});
             }
         });
 });
@@ -92,22 +96,9 @@ async function addUser(userName, password) { // Create new user in DB
     var salt = await bcrypt.genSalt(saltRounds);
     var hashedPw = await bcrypt.hash(password, salt);
 
-    console.log("clear text pw: " + password);
-    console.log("salt: " + salt);
-    console.log("hashed pw: " + hashedPw);
-    
-    couch.insert("users", {
+    await couch.insert("users", {
         _id: uuid[0], // TODO: is ID necessary? 
         userName: JSON.stringify(userName),
         password: hashedPw
-    }).then(({data, headers, status}) => {
-       // console.log(JSON.stringify(data));
-        // data is json response
-        // headers is an object with all response headers
-        // status is statusCode number
-    }, err => {
-        //console.log("error: " + err);
-        // either request error occured
-        // ...or err.code=EDOCCONFLICT if document with the same id already exists
-    });
+    })
 }
