@@ -41,8 +41,8 @@ async function login() {
         passwordLabel.innerHTML = 'Password - Wrong Password';
         passwordLabel.style.color = '#ff0000';
     }
-    else {
-        console.log(responseJson);
+    else if(responseJson.response == 'success'){
+        document.cookie = 'token: ' + responseJson.token;
     }
 }
 
@@ -70,8 +70,8 @@ async function register() {
         userNameLabel.innerHTML = 'Username - Username already taken'
         userNameLabel.style.color = '#ff0000';
     }
-    else {
-        console.log(responseJson);
+    else if(responseJson.response == 'success'){
+        document.cookie = 'token: ' + responseJson.token;
     }
 }
 

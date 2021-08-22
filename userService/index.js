@@ -38,7 +38,7 @@ app.post('/register',  async (req,res) => { // TODO: You can also make (req,res)
         let user = await getUserFromDB(req.body.userName);
         let rand = require('crypto').randomBytes(64).toString('hex');
         let accessToken = jwt.sign(user, rand);
-        res.json(accessToken);
+        res.json({response: "success", token: accessToken});
     }
     else 
         res.json({response:"userName taken"});
@@ -66,9 +66,10 @@ app.post('/login', async (req,res) => { // TODO: Automatically redirect to 'regi
             }
             else {
                 if(result == true) {
+                    console.log("successfully logged in");
                     var rand = require('crypto').randomBytes(64).toString('hex');
                     var accessToken = jwt.sign(user, rand);
-                    res.json(accessToken);
+                    res.json({response: "success", token: accessToken});
                 }
                 else 
                     res.json({response: "wrong pw"});
