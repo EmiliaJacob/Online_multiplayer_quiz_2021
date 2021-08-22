@@ -8,6 +8,16 @@ const port = 3001;
 const NodeCouchDb = require('node-couchdb');
 const jwt = require('jsonwebtoken');
 
+const cors = require('cors');
+
+app.use(
+    cors({
+        origin: 'http://localhost:3000',
+        methods: ["GET", "POST"],
+        credentials: true
+    })
+);
+
 app.use(express.json());
 
 const couch = new NodeCouchDb({ // See the default values at https://www.npmjs.com/package/node-couchdb
@@ -36,6 +46,7 @@ app.post('/register',  async (req,res) => { // TODO: You can also make (req,res)
 	 
 app.post('/login', async (req,res) => { // TODO: Automatically redirect to 'register' if user doesn't exist
     // compare pwds: 
+        console.log("new login request: " + JSON.stringify(req.body));
         if(!req.body.password || !req.body.userName) { // Check if correct JSON is sent
                 res.json({answer:"unexpected body"});
                 return;            
