@@ -1,7 +1,7 @@
 html 
     script(src='http://localhost:3000/static/login.js')
     head
-        h1 Login
+        h1#header Login
     body
         p
             label(for="inputUsername") Username
@@ -12,5 +12,4 @@ html
             br
             input(type="text")#inputPassword
         p
-            a(href="http://localhost:3000/hub")
-                button submit
+            button#submitButton submit

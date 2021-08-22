@@ -41,7 +41,7 @@ app.post('/register',  async (req,res) => { // TODO: You can also make (req,res)
         res.json(accessToken);
     }
     else 
-        res.json({answer:"username is already taken"});
+        res.json({answer:"userName taken"});
 });
 	 
 app.post('/login', async (req,res) => { // TODO: Automatically redirect to 'register' if user doesn't exist
@@ -71,7 +71,7 @@ app.post('/login', async (req,res) => { // TODO: Automatically redirect to 'regi
                     res.json(accessToken);
                 }
                 else 
-                    res.json({response: "sucessfully logged in"});
+                    res.json({response: "wrong pw"});
             }
         });
 });
