@@ -1,15 +1,15 @@
 html 
     script(src='http://localhost:3000/static/login.js')
     head
-        h1#header Login
     body
         p
-            label(for="inputUsername") Username
+            label(for="inputUsername")#labelUsername Username
             br
             input(type="text" title="username")#inputUsername
         p
-            label(for="inputPassword") Password  
+            label(for="inputPassword")#labelPassword Password  
             br
             input(type="text")#inputPassword
         p
-            button#submitButton submit
+            button#login login
+            button#register register

@@ -29,7 +29,7 @@ const couch = new NodeCouchDb({ // See the default values at https://www.npmjs.c
 
 app.post('/register',  async (req,res) => { // TODO: You can also make (req,res) async. This might help in refactoring
     if(!req.body.userName || !req.body.password) { // Check if required fields are part of request
-        res.json({answer:"unexpexted body"});
+        res.json({response:"unexpexted body"});
         return;
     }
     
@@ -41,14 +41,14 @@ app.post('/register',  async (req,res) => { // TODO: You can also make (req,res)
         res.json(accessToken);
     }
     else 
-        res.json({answer:"userName taken"});
+        res.json({response:"userName taken"});
 });
 	 
 app.post('/login', async (req,res) => { // TODO: Automatically redirect to 'register' if user doesn't exist
     // compare pwds: 
         console.log("new login request: " + JSON.stringify(req.body));
         if(!req.body.password || !req.body.userName) { // Check if correct JSON is sent
-                res.json({answer:"unexpected body"});
+                res.json({response:"unexpected body"});
                 return;            
         }
 
