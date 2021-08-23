@@ -8,6 +8,9 @@ const port = 3001;
 const NodeCouchDb = require('node-couchdb');
 const jwt = require('jsonwebtoken');
 
+const rand = '489ff0dd3d55fd69ed103b662106c4c29a57e8d3694b20a4c7afeef210bb899be9e42268b8a1fefe879ba331c3f07f6a6fcaff77ed8e2ac78e3a637e3552d8ec';
+//Wurde erzeugt mit require('crypto').randomBytes(64).toString('hex');
+
 const cors = require('cors');
 
 app.use(
@@ -36,7 +39,6 @@ app.post('/register',  async (req,res) => { // TODO: You can also make (req,res)
     if(await getUserFromDB(req.body.userName) == null) {
         await addUser(req.body.userName, req.body.password);
         let user = await getUserFromDB(req.body.userName);
-        let rand = require('crypto').randomBytes(64).toString('hex');
         let accessToken = jwt.sign(user, rand);
         res.json({response: "success", token: accessToken});
     }
@@ -67,7 +69,6 @@ app.post('/login', async (req,res) => { // TODO: Automatically redirect to 'regi
             else {
                 if(result == true) {
                     console.log("successfully logged in");
-                    var rand = require('crypto').randomBytes(64).toString('hex');
                     var accessToken = jwt.sign(user, rand);
                     res.json({response: "success", token: accessToken});
                 }
@@ -75,6 +76,25 @@ app.post('/login', async (req,res) => { // TODO: Automatically redirect to 'regi
                     res.json({response: "wrong pw"});
             }
         });
+});
+
+app.post('/checkToken', (req,res) => {
+    var authHeader = req.headers['authorization'];
+
+    if(!authHeader) 
+        return res.json({response: "missing authorization information"});
+
+    var token = authHeader.split(' ')[1];
+
+    console.log(token);
+
+    jwt.verify(token, rand, (err, user) => {
+        if(err){
+            return res.json({response: "wrong credentials"});
+        }
+       
+        res.json({response: "authorized"});
+    })
 });
 
 async function getPasswordHash(password) {
