@@ -24,38 +24,11 @@ function startCountdown(countdownTime) {
     }
 }
 
-function getTokenCookie() {
-    cookies = document.cookie.split(";");
-    for(i=0; i<cookies.length; i++) {
-        var splittedCookie = cookies[i].split(' ');
-        if(splittedCookie[0] == 'token:')
-            return splittedCookie[1];
-    }
-    return null;
-}
-
 window.onload = async function() {
-    var tokenCookie = getTokenCookie();
-
-    if(!tokenCookie)
-        document.location.href = "http://localhost:3000/login";
-    
-    
-    console.log(tokenCookie);
-    var response = await fetch('http://localhost:3001/checkToken' , {
-        method: 'POST',
-        headers: {
-            'Authorization': 'Bearer ' + tokenCookie
-        }
-    });
-
-    var responseJson = await response.json();
-
-    if(responseJson.response != 'authorized')
-        return document.location.href = "http://localhost:3000/login";
-        
-    timerRunning = false;
-    init();
+    if(authorize()) {
+        timerRunning = false;
+        init();
+    }
 }
 
 function init() {
