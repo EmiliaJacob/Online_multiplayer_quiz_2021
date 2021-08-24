@@ -1,14 +1,54 @@
 var client;
+var userName;
+var findGameButton;
+var stopSearchingButton;
+var joinMatchButton;
+var searchStatus;
 
-window.onload = function() {
+window.onload = async function() {
+    userName = await authorize(); // TODO: Bad code
+
+    if(!userName)
+        return;
+        
+    document.getElementById('username').innerHTML = userName;
+
     init();
-    document.getElementById("findGame").addEventListener("click", () => {
-            let message = new Paho.MQTT.Message("client with id xxx searches match");
-            message.destinationName = "quiz/queue";
-            client.send(message);
-            document.getElementById("status").innerHTML = "Searching for match...";
-        }
-    )
+
+    findGameButton = document.getElementById("findGame");
+    findGameButton.addEventListener("click", onFindMatchClicked);
+    stopSearchingButton = document.getElementById("stopSearching");
+    stopSearchingButton.addEventListener("click", onStopSearchingClicked);
+    joinMatchButton = document.getElementById('joinMatch');
+    joinMatchButton.addEventListener('click', onJoinMatchClicked);
+    searchStatus = document.getElementById('status');
+}
+
+function onFindMatchClicked() {
+    let message = new Paho.MQTT.Message("queueing " + userName);
+    message.destinationName = "quiz/queue";
+    client.send(message);
+    searchStatus.innerHTML = "Searching for match...";
+    findGameButton.style.visibility='hidden';
+    stopSearchingButton.style.visibility="visible";
+}
+
+function onStopSearchingClicked() {
+    searchStatus.innerHTML='';
+    findGameButton.style.visibility="visible";
+    stopSearchingButton.visibility="hidden";
+    let message = new Paho.MQTT.Message("exiting " + userName);
+    message.destinationName = "quiz/queue";
+    client.send(message);
+}
+
+async function onJoinMatchClicked(){
+    let message = new Paho.MQTT.Message("joining " + userName);
+    message.destinationName = "quiz/queue";
+    client.send(message);
+
+    client.disconnect();
+    document.location.href = "http://localhost:3000/game";
 }
 
 function init() {
@@ -23,15 +63,16 @@ function init() {
 
 function onMessageArrived(msg) {
     console.log("received message: " + msg.payloadString);
-    
-    if(msg.payloadString == "Found match") {
-        client.disconnect();
-        document.location.href = "http://localhost:3000/game";
+   
+    var playersInMatch = msg.payloadString.split(' ');
+    for(i=0; i<playersInMatch.length; i++) {
+        if(playersInMatch[i] == userName) {         
+            console.log("found a match");
+            searchStatus.innerHTML = "Found a match! Waiting for you to join..."
+            stopSearchingButton.style.visibility='hidden';
+            joinMatchButton.style.visibility='visible';
+        }
     }
-    else {
-        document.getElementById("status").innerHTML = "Can't find a match. Please try again later";
-    }
-
 }
 
 function onConnectionSuccess() {

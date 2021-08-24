@@ -43,6 +43,7 @@ async function login() {
     }
     else if(responseJson.response == 'success'){
         document.cookie = 'token: ' + responseJson.token;
+        document.location.href = "http://localhost:3000/hub";
     }
 }
 
@@ -72,6 +73,7 @@ async function register() {
     }
     else if(responseJson.response == 'success'){
         document.cookie = 'token: ' + responseJson.token;
+        document.location.href = "http://localhost:3000/hub";
     }
 }
 

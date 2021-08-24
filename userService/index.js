@@ -93,7 +93,7 @@ app.post('/checkToken', (req,res) => {
             return res.json({response: "wrong credentials"});
         }
        
-        res.json({response: "authorized"});
+        res.json({response: "authorized", user});
     })
 });
 
