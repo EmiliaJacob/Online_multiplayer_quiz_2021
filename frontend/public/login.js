@@ -43,7 +43,7 @@ async function login() {
     }
     else if(responseJson.response == 'success'){
         document.cookie = 'token: ' + responseJson.token;
-        document.location.href = "http://localhost:3000/hub";
+        document.location.href = "http://localhost:3000/game";
     }
 }
 
@@ -73,7 +73,7 @@ async function register() {
     }
     else if(responseJson.response == 'success'){
         document.cookie = 'token: ' + responseJson.token;
-        document.location.href = "http://localhost:3000/hub";
+        document.location.href = "http://localhost:3000/game";
     }
 }
 

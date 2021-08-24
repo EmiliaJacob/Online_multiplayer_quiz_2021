@@ -82,7 +82,7 @@ app.post('/checkToken', (req,res) => {
     var authHeader = req.headers['authorization'];
 
     if(!authHeader) 
-        return res.json({response: "missing authorization information"});
+                return res.json({response: "missing authorization information"});
 
     var token = authHeader.split(' ')[1];
 

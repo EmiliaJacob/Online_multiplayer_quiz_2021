@@ -2,6 +2,8 @@ var timerRunning = false;
 var isGameMaster = false;
 var currentRole;
 
+alert(myVar);
+
 function startCountdown(countdownTime) {
     if(!timerRunning) {
         var countdownVisualisation = document.getElementById("countdown");
@@ -27,13 +29,13 @@ function startCountdown(countdownTime) {
 window.onload = async function() {
     if(authorize()) {
         timerRunning = false;
-        init();
+        setupMQTT();
     }
 }
 
-function init() {
+function setupMQTT() {
     client = new Paho.MQTT.Client("localhost", 8080, "/mqtt/", "quizMatchClient");
-    client.onMessageArrived = onMessageArrived;
+    client.onMessageArrived = onMessageArrivedHub;
     client.onMessageDelivered = onMessageDelivered;
 
     client.connect(
@@ -42,7 +44,7 @@ function init() {
     )
 }
 
-function onMessageArrived(msg) {
+function onMessageArrivedHub(msg) {
     console.log("received message: " + msg.destinationName);
     if(msg.destinationName == "quiz/match/timer") {
         let convertedMsg = parseInt(msg.payloadString);
@@ -116,7 +118,7 @@ function onConnectionSuccess() {
 
 function onConnectionFailure(err) {
     console.log("connection failure: " + err);
-    setTimeout(init, 2000);
+    setTimeout(setupMQTT, 2000);
 }
 
 function setToGameMasterView() {
