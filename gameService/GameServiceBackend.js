@@ -102,7 +102,7 @@ function onMessage(topic, message) {
 	switch(mode){
 		case "LookingForGame":		
 			JoinGame(message);	
-		break;
+			break;
 		case "CreatingGame":
 			CreateGame(message);
 			break;
