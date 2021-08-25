@@ -1,13 +1,3 @@
-function getTokenCookie() {
-    cookies = document.cookie.split(";");
-    for(i=0; i<cookies.length; i++) {
-        var splittedCookie = cookies[i].split(' ');
-        if(splittedCookie[0] == 'token:')
-            return splittedCookie[1];
-    }
-    return null;
-}
-
 async function checkToken(tokenCookie) {
     let response = await fetch('http://localhost:3001/checkToken' , {
         method: 'POST',
@@ -21,9 +11,9 @@ async function checkToken(tokenCookie) {
 }
 
 async function authorize() {
-    var tokenCookie = getTokenCookie();
+    var tokenFromCookie = document.cookie.split('=')[1];
 
-    if(!tokenCookie) {
+    if(!tokenFromCookie) {
         document.location.href = "http://localhost:3000/login";
         return false;
     }
@@ -31,7 +21,7 @@ async function authorize() {
     let response = await fetch('http://localhost:3001/checkToken' , {
         method: 'POST',
         headers: {
-            'Authorization': 'Bearer ' + tokenCookie
+            'Authorization': 'Bearer ' + tokenFromCookie
         }
     });
 

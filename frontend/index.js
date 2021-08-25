@@ -12,13 +12,23 @@ app.get('/login', async (req,res) => {
 })
 
 app.get('/game', async(req,res) => {
-    res.render('hub');
+    //res.render('hub');
+    res.render('main');
 })
 
-app.get('/test', async(req,res) => {
+app.post('/gameView', async(req,res) => {
+    console.log("jlesfjlk");
     if(req.body.matchTopic)
         console.log(req.body.matchTopic);
     res.render('game', {hello:"World"});
+});
+
+app.get('/playerView', (req,res) => {
+
+});
+
+app.post('/gameMasterView', (req, res) => {
+
 });
 
 app.listen(port, () => {

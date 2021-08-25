@@ -70,7 +70,10 @@ async function onJoinMatchClicked(){
         publishMessage(0, 'quiz/'+matchTopic, 'joining ' + userName);
         searchStatus.innerHTML = 'Waiting for the other player to join ...'
         joinMatchButton.style.visibility='hidden';
-        let result = await fetch('http://localhost:3000/test');
+        let result = await fetch('http://localhost:3000/test', {
+            method: 'POST',
+            body: JSON.stringify({matchTopic: matchTopic})
+        });
         let html = await result.text();
         console.log(html);
         document.querySelector('html').innerHTML = html;

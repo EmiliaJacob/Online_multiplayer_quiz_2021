@@ -42,7 +42,7 @@ async function login() {
         passwordLabel.style.color = '#ff0000';
     }
     else if(responseJson.response == 'success'){
-        document.cookie = 'token: ' + responseJson.token;
+        document.cookie = 'token=' + responseJson.token;
         document.location.href = "http://localhost:3000/game";
     }
 }
