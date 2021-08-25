@@ -7,6 +7,10 @@ app.use(express.json());
 
 app.set('view engine', 'pug');
 
+app.listen(port, () => {
+    console.log('listening on port: ' + port);
+});
+
 app.get('/login', async (req,res) => {
     res.render('login');
 })
@@ -21,14 +25,7 @@ app.get('/hub', async(req,res) => {
     res.render('hub');
 })
 
-app.post('/gameView', async(req,res) => {
-    console.log("jlesfjlk");
-    if(req.body.matchTopic)
-        console.log(req.body.matchTopic);
-    res.render('game', {hello:"World"});
-});
-
-app.get('/playerView', (req,res) => {
+app.get('/player', (req,res) => {
 
 });
 
@@ -36,6 +33,3 @@ app.get('/gameMaster', (req, res) => {
    res.render('gameMaster');
 });
 
-app.listen(port, () => {
-    console.log('listening on port: ' + port);
-});

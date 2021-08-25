@@ -120,7 +120,7 @@ async function switchToGameMaster() {
 }
 
 async function switchToPlayer() {
-
+    
 }
 
 async function switchToHub() {
