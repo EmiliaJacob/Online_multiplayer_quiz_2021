@@ -28,7 +28,7 @@ function onStopSearchingClicked() {
 async function onJoinMatchClicked(){
     unsubscribe('quiz/joinGame/' + username, () => {});
     subscribe('quiz/'+matchTopic, async () => {
-        publishMessage(0, 'quiz/'+matchTopic, 'joining ' + username);
+        publishMessage(0, 'quiz/'+matchTopic + '/server', 'joining ' + username);
         searchStatus.innerHTML = 'Waiting for the other player to join ...'
         joinMatchButton.style.visibility='hidden';
     });

@@ -2,7 +2,6 @@ var timerRunning = false;
 var isGameMaster = false;
 var currentRole;
 
-alert(myVar);
 
 function startCountdown(countdownTime) {
     if(!timerRunning) {
@@ -26,23 +25,6 @@ function startCountdown(countdownTime) {
     }
 }
 
-window.onload = async function() {
-    if(authorize()) {
-        timerRunning = false;
-        setupMQTT();
-    }
-}
-
-function setupMQTT() {
-    client = new Paho.MQTT.Client("localhost", 8080, "/mqtt/", "quizMatchClient");
-    client.onMessageArrived = onMessageArrivedHub;
-    client.onMessageDelivered = onMessageDelivered;
-
-    client.connect(
-        {onSuccess: onConnectionSuccess},
-        {onFailure: onConnectionFailure}
-    )
-}
 
 function onMessageArrivedHub(msg) {
     console.log("received message: " + msg.destinationName);
@@ -84,53 +66,6 @@ function onMessageArrivedHub(msg) {
     }
 }
 
-function onMessageDelivered(msg) {
-    console.log("message has delivered: " + msg.payloadString);
-}
-
-function subscribe(topic, onSuccess) {
-    client.subscribe(topic, {
-        onSuccess: onSuccess,
-        onFailure: function(err) {
-            console.log("Couldn't subscribe to topic: " + JSON.stringify(err.errorMessage));
-            setTimeout(2000, subscribe(topic, onSuccess));
-        }
-    });
-}
-
-function publishMessage(qos, destination, payload) {
-    try {
-        let message = new Paho.MQTT.Message(payload);
-        message.destinationName = destination;
-        message.qos = qos;
-        client.send(message)
-    } catch  {
-        console.log("client is not connected");
-    }
-}
-
-function onConnectionSuccess() {
-    console.log("sucessfully connected");
-    subscribe("quiz/match/#", () => {
-        publishMessage(0, "quiz/match/status", "Client ready");
-    });
-}
-
-function onConnectionFailure(err) {
-    console.log("connection failure: " + err);
-    setTimeout(setupMQTT, 2000);
-}
-
-function setToGameMasterView() {
-    var questionParagraph = document.getElementById("question");
-    questionParagraph.innerHTML = '';
-    
-    var header = document.createElement("h2");
-    header.id = "questionDisplay";
-    header.innerHTML = "Please select a question: ";
-    questionParagraph.appendChild(header);
-}
-
 function setToPlayerView() {
     var chars = "abcd";
 
@@ -156,6 +91,15 @@ function setToPlayerView() {
 
         let br = document.createElement("br");
         questionParagraph.appendChild(br);
+    }
+}
+
+function onConfirmSelectionClicked(){
+    questions = document.getElementById('questions').children;
+    for(i=0; i<questions.length; i++){
+        if(questions[i].tagName == 'INPUT' && questions[i].checked){
+            publishMessage(0, 'quiz/' + matchTopic + '/server', questions[i].value);
+        }
     }
 }
 

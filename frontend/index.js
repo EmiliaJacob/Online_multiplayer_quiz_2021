@@ -32,8 +32,8 @@ app.get('/playerView', (req,res) => {
 
 });
 
-app.post('/gameMasterView', (req, res) => {
-
+app.get('/gameMaster', (req, res) => {
+   res.render('gameMaster');
 });
 
 app.listen(port, () => {

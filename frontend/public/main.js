@@ -2,6 +2,11 @@ var username;
 var matchTopic;
 var questions;
 
+var dummyQuestions = [
+    {a:2,b:3,c:4,d:5},
+    {e:6,f:7,g:8,h:9}
+];
+
 window.onload = async function() { // Hub - perspective is loaded by default
     username = await authorize(); 
 
@@ -42,7 +47,7 @@ function onConnectionFailure(err) {
     setTimeout(setupMQTT, 2000);
 }
 
-function onMessageArrived(msg) {
+async function onMessageArrived(msg) {
     console.log("received message: " + msg.payloadString);
 
     var splittedMsg = msg.payloadString.split(' ');
@@ -61,8 +66,61 @@ function onMessageArrived(msg) {
     }
 
     if(splittedMsg[0] == 'questions') {
-        questions = JSON.parse(splittedMsg[1]);
+        console.log(splittedMsg[1]);
+        
+        try {
+            questions = JSON.parse(splittedMsg[1]);
+        } catch {
+            console.log('string couldnt be parsed into json');
+        }
+
+        publishMessage(0, 'quiz/'+matchTopic + '/server', 'questionsRecieved ' + username);
     }
+
+    if(splittedMsg[0] == 'setRoles') { // TODO: besprechen
+        if(splittedMsg[1] == 'gameMaster') {
+
+            await switchToGameMaster();
+            publishMessage(0, 'quiz/' + matchTopic + '/server', 'roleSet ' + username);
+
+        }
+        else {
+
+            publishMessage(0, 'quiz/' + matchTopic + '/server', 'roleSet ' + username);
+        }
+    }
+}
+
+async function switchToGameMaster() {
+    let result = await fetch('http://localhost:3000/gameMaster');
+    let gameMasterView = await result.text();
+    document.getElementById('view').innerHTML = gameMasterView;
+    var questionDiv = document.getElementById('questions');
+
+    for(i=0; i<dummyQuestions.length; i++) {
+        console.log(JSON.stringify(dummyQuestions[i]));
+        let question = JSON.stringify(dummyQuestions[i]);
+
+        let selection = document.createElement("input");
+        selection.id = i;
+        selection.type = "radio";
+        selection.name = "choices";
+        selection.value = question;
+        questionDiv.appendChild(selection);
+
+        let label = document.createElement("label");
+        label.for = selection.id;
+        label.innerHTML = question;
+        questionDiv.appendChild(label);
+        questionDiv.appendChild(document.createElement('br'));
+    }
+
+    document.getElementById('0').checked = true;
+    document.getElementById('confirmSelection').addEventListener('click', onConfirmSelectionClicked);
+}
+
+async function switchToPlayer() {
+
 }
 
 async function switchToHub() {
@@ -79,11 +137,4 @@ async function switchToHub() {
     searchStatus = document.getElementById('status');
 
     subscribe('quiz/joinGame/' + username, ()=>{});
-}
-
-async function switchToGame() {
-    //unsubscribe from previous topics
-    //change the view to game
-    //subscribe to new topics
-    //set all callbacks and eventlisteners
 }
