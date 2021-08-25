@@ -1,4 +1,6 @@
 var username;
+var matchTopic;
+var questions;
 
 window.onload = async function() { // Hub - perspective is loaded by default
     username = await authorize(); 
@@ -31,6 +33,7 @@ function setupMQTT() {
 
 function onConnectionSuccess() {
     console.log("sucessfully connected");
+    client.onMessageArrived = onMessageArrived;
     switchToHub();
 }
 
@@ -39,35 +42,27 @@ function onConnectionFailure(err) {
     setTimeout(setupMQTT, 2000);
 }
 
-function publishMessage(qos, destination, payload) {
-    try {
-        let message = new Paho.MQTT.Message(payload);
-        message.destinationName = destination;
-        message.qos = qos;
-        client.send(message)
-    } catch  {
-        console.log("client is not connected");
+function onMessageArrived(msg) {
+    console.log("received message: " + msg.payloadString);
+
+    var splittedMsg = msg.payloadString.split(' ');
+
+    if(splittedMsg[0] == 'foundMatch') {
+        matchTopic = splittedMsg[1]; 
+
+        searchStatus.innerHTML = "Found a match! Waiting for you to join ..."
+        stopSearchingButton.style.visibility='hidden';
+        joinMatchButton.style.visibility='visible';
     }
-}
+    
+    if(splittedMsg[0] == 'gameStart') {
+        searchStatus.innerHTML = 'Game starts ...';
+        console.log('game starts');
+    }
 
-function subscribe(topic, onSuccess) {
-    client.subscribe(topic, {
-        onSuccess: onSuccess,
-        onFailure: function(err) {
-            console.log("Couldn't subscribe to topic: " + JSON.stringify(err.errorMessage));
-            setTimeout(2000, subscribe(topic, onSuccess));
-        }
-    });
-}
-
-function unsubscribe(topic, onSuccess) {
-    client.unsubscribe(topic, {
-        onSuccess: onSuccess,
-        onFailure: function(err) {
-            console.log("Couldn't subscribe to topic: " + JSON.stringify(err.errorMessage));
-            setTimeout(2000, subscribe(topic, onSuccess));
-        }
-    });
+    if(splittedMsg[0] == 'questions') {
+        questions = JSON.parse(splittedMsg[1]);
+    }
 }
 
 async function switchToHub() {
@@ -83,13 +78,11 @@ async function switchToHub() {
     joinMatchButton.addEventListener('click', onJoinMatchClicked);
     searchStatus = document.getElementById('status');
 
-    client.onMessageArrived = onMessageArrivedHub;
     subscribe('quiz/joinGame/' + username, ()=>{});
 }
 
 async function switchToGame() {
     //unsubscribe from previous topics
-    unsubscribe('quiz/joinGame/' + username, () => {});
     //change the view to game
     //subscribe to new topics
     //set all callbacks and eventlisteners

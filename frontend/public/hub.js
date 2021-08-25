@@ -7,22 +7,9 @@ var searchStatus;
 var timerRunning = false;
 var isGameMaster = false;
 var currentRole;
-var questions;
 // general or for both
-var client;
-var matchTopic;
 
 //Hub
-
-function setupMQTT() {
-    client = new Paho.MQTT.Client("localhost", 8080, "/mqtt/", "quizHubClient");
-    client.onMessageArrived = onMessageArrivedHub;
-
-    client.connect(
-        {onSuccess: onConnectionSuccess},
-        {onFailure: onConnectionFailure}
-    )
-}
 
 function onFindMatchClicked() {
     publishMessage(0,'quiz/queue', 'queueing ' + username);
@@ -39,34 +26,12 @@ function onStopSearchingClicked() {
 }
 
 async function onJoinMatchClicked(){
-    console.log('quiz/'+matchTopic);
+    unsubscribe('quiz/joinGame/' + username, () => {});
     subscribe('quiz/'+matchTopic, async () => {
         publishMessage(0, 'quiz/'+matchTopic, 'joining ' + username);
         searchStatus.innerHTML = 'Waiting for the other player to join ...'
         joinMatchButton.style.visibility='hidden';
-        let result = await fetch('http://localhost:3000/test', {
-            method: 'POST',
-            body: JSON.stringify({matchTopic: matchTopic})
-        });
-        let html = await result.text();
-        console.log(html);
-        document.querySelector('html').innerHTML = html;
-        
     });
-}
-
-function onMessageArrivedHub(msg) {
-    console.log("received message: " + msg.payloadString);
-
-    var splittedMsg = msg.payloadString.split(' ');
-
-    if(splittedMsg[0] == 'foundMatch') {
-        matchTopic = splittedMsg[1]; 
-
-        searchStatus.innerHTML = "Found a match! Waiting for you to join..."
-        stopSearchingButton.style.visibility='hidden';
-        joinMatchButton.style.visibility='visible';
-    }
 }
 
 function startCountdown(countdownTime) {
@@ -90,7 +55,6 @@ function startCountdown(countdownTime) {
         }
     }
 }
-
 
 // Game
 
