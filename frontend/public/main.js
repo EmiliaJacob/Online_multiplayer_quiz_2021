@@ -1,18 +1,19 @@
+var username;
 
 window.onload = async function() { // Hub - perspective is loaded by default
-    userName = await authorize(); 
+    username = await authorize(); 
 
-    if(!userName)
+    if(!username)
         return;
         
-    document.getElementById('username').innerHTML = userName;
+    document.getElementById('username').innerHTML = username;
 
-    setupMQTT();
+    await setupMQTT();
 
-    document.getElementById('logout').addEventListener('click', logoutButton);
+    document.getElementById('logout').addEventListener('click', onLogoutClicked);
 }
 
-function logoutButton(){
+function onLogoutClicked(){
     console.log('logout button pressed');
     let cookie = document.cookie;    
     document.cookie = cookie + '; expires=Thu, 18 Dec 2013 12:00:00 UTC';
@@ -21,7 +22,6 @@ function logoutButton(){
 
 function setupMQTT() {
     client = new Paho.MQTT.Client("localhost", 8080, "/mqtt/", "quizHubClient");
-    client.onMessageArrived = onMessageArrivedHub;
 
     client.connect(
         {onSuccess: onConnectionSuccess},
@@ -31,7 +31,7 @@ function setupMQTT() {
 
 function onConnectionSuccess() {
     console.log("sucessfully connected");
-    client.subscribe("quiz/joinGame/"+userName);
+    switchToHub();
 }
 
 function onConnectionFailure(err) {
@@ -39,16 +39,58 @@ function onConnectionFailure(err) {
     setTimeout(setupMQTT, 2000);
 }
 
-function onMessageArrivedHub(msg) {
-    console.log("received message: " + msg.payloadString);
-
-    var splittedMsg = msg.payloadString.split(' ');
-
-    if(splittedMsg[0] == 'foundMatch') {
-        matchTopic = splittedMsg[1]; 
-
-        searchStatus.innerHTML = "Found a match! Waiting for you to join..."
-        stopSearchingButton.style.visibility='hidden';
-        joinMatchButton.style.visibility='visible';
+function publishMessage(qos, destination, payload) {
+    try {
+        let message = new Paho.MQTT.Message(payload);
+        message.destinationName = destination;
+        message.qos = qos;
+        client.send(message)
+    } catch  {
+        console.log("client is not connected");
     }
+}
+
+function subscribe(topic, onSuccess) {
+    client.subscribe(topic, {
+        onSuccess: onSuccess,
+        onFailure: function(err) {
+            console.log("Couldn't subscribe to topic: " + JSON.stringify(err.errorMessage));
+            setTimeout(2000, subscribe(topic, onSuccess));
+        }
+    });
+}
+
+function unsubscribe(topic, onSuccess) {
+    client.unsubscribe(topic, {
+        onSuccess: onSuccess,
+        onFailure: function(err) {
+            console.log("Couldn't subscribe to topic: " + JSON.stringify(err.errorMessage));
+            setTimeout(2000, subscribe(topic, onSuccess));
+        }
+    });
+}
+
+async function switchToHub() {
+    let result = await fetch('http://localhost:3000/hub');
+    let hubViewHtml = await result.text();
+    document.getElementById('view').innerHTML = hubViewHtml;
+
+    findGameButton = document.getElementById("findGame");
+    findGameButton.addEventListener("click", onFindMatchClicked);
+    stopSearchingButton = document.getElementById("stopSearching");
+    stopSearchingButton.addEventListener("click", onStopSearchingClicked);
+    joinMatchButton = document.getElementById('joinMatch');
+    joinMatchButton.addEventListener('click', onJoinMatchClicked);
+    searchStatus = document.getElementById('status');
+
+    client.onMessageArrived = onMessageArrivedHub;
+    subscribe('quiz/joinGame/' + username, ()=>{});
+}
+
+async function switchToGame() {
+    //unsubscribe from previous topics
+    unsubscribe('quiz/joinGame/' + username, () => {});
+    //change the view to game
+    //subscribe to new topics
+    //set all callbacks and eventlisteners
 }

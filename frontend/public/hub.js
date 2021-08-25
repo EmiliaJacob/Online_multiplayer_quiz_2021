@@ -10,31 +10,9 @@ var currentRole;
 var questions;
 // general or for both
 var client;
-var userName;
 var matchTopic;
 
-// Hub
-
-window.onload = async function() { // Hub - perspective is loaded by default
-    userName = await authorize(); 
-
-    if(!userName)
-        return;
-        
-    document.getElementById('username').innerHTML = userName;
-
-    setupMQTT();
-
-    findGameButton = document.getElementById("findGame");
-    findGameButton.addEventListener("click", onFindMatchClicked);
-    stopSearchingButton = document.getElementById("stopSearching");
-    stopSearchingButton.addEventListener("click", onStopSearchingClicked);
-    joinMatchButton = document.getElementById('joinMatch');
-    joinMatchButton.addEventListener('click', onJoinMatchClicked);
-    searchStatus = document.getElementById('status');
-
-    timerRunning = false;
-}
+//Hub
 
 function setupMQTT() {
     client = new Paho.MQTT.Client("localhost", 8080, "/mqtt/", "quizHubClient");
@@ -47,9 +25,7 @@ function setupMQTT() {
 }
 
 function onFindMatchClicked() {
-    let message = new Paho.MQTT.Message("queueing " + userName);
-    message.destinationName = "quiz/queue";
-    client.send(message);
+    publishMessage(0,'quiz/queue', 'queueing ' + username);
     searchStatus.innerHTML = "Searching for match...";
     findGameButton.style.visibility='hidden';
     stopSearchingButton.style.visibility="visible";
@@ -59,15 +35,13 @@ function onStopSearchingClicked() {
     searchStatus.innerHTML='';
     findGameButton.style.visibility="visible";
     stopSearchingButton.style.visibility="hidden";
-    let message = new Paho.MQTT.Message("exiting " + userName);
-    message.destinationName = "quiz/queue";
-    client.send(message);
+    publishMessage(0,'quiz/queue', 'exiting ' + username);
 }
 
 async function onJoinMatchClicked(){
     console.log('quiz/'+matchTopic);
     subscribe('quiz/'+matchTopic, async () => {
-        publishMessage(0, 'quiz/'+matchTopic, 'joining ' + userName);
+        publishMessage(0, 'quiz/'+matchTopic, 'joining ' + username);
         searchStatus.innerHTML = 'Waiting for the other player to join ...'
         joinMatchButton.style.visibility='hidden';
         let result = await fetch('http://localhost:3000/test', {
@@ -158,38 +132,4 @@ function onMessageArrivedGame(msg) {
             })
         }
     }
-}
-
-
-// General or both
-
-function publishMessage(qos, destination, payload) {
-    try {
-        let message = new Paho.MQTT.Message(payload);
-        message.destinationName = destination;
-        message.qos = qos;
-        client.send(message)
-    } catch  {
-        console.log("client is not connected");
-    }
-}
-
-function subscribe(topic, onSuccess) {
-    client.subscribe(topic, {
-        onSuccess: onSuccess,
-        onFailure: function(err) {
-            console.log("Couldn't subscribe to topic: " + JSON.stringify(err.errorMessage));
-            setTimeout(2000, subscribe(topic, onSuccess));
-        }
-    });
-}
-
-function onConnectionSuccess() {
-    console.log("sucessfully connected");
-    client.subscribe("quiz/joinGame/"+userName);
-}
-
-function onConnectionFailure(err) {
-    console.log("connection failure: " + err);
-    setTimeout(setupMQTT, 2000);
 }

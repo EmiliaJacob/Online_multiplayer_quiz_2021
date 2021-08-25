@@ -16,6 +16,11 @@ app.get('/game', async(req,res) => {
     res.render('main');
 })
 
+app.get('/hub', async(req,res) => {
+    //res.render('hub');
+    res.render('hub');
+})
+
 app.post('/gameView', async(req,res) => {
     console.log("jlesfjlk");
     if(req.body.matchTopic)
