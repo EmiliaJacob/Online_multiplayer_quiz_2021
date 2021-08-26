@@ -74,10 +74,11 @@ async function onMessageArrived(msg) {
         publishMessage(0, matchServerTopic, 'questionsRecieved', username);
     }
 
-    if(message.command == 'setRoles') { 
-        if(message.content == 'gameMaster') {
+    if(message.command == 'setGameMaster') { 
+        if(message.content == username) {
             isGameMaster = true;
             await switchToGameMaster();
+            displayQuestionsGameMaster();
             publishMessage(0, matchServerTopic , 'roleSet' , username);
 
         }
@@ -91,7 +92,7 @@ async function onMessageArrived(msg) {
         if(isGameMaster)
             return;
 
-        displayQuestion(message.content);
+        displayQuestionsPlayer(message.content);
         publishMessage(0, matchServerTopic , 'receivedSelectedQuestion' , username);
     }
 

@@ -5,28 +5,42 @@ async function switchToGameMaster() {
     let result = await fetch('http://localhost:3000/gameMaster');
     let gameMasterView = await result.text();
     document.getElementById('view').innerHTML = gameMasterView;
+}
 
+function displayQuestionsGameMaster() {
     var questionDiv = document.getElementById('questions');
 
-    for(i=0; i<dummyQuestions.length; i++) {
-        console.log(JSON.stringify(dummyQuestions[i]));
-        let question = JSON.stringify(dummyQuestions[i]);
+    for(i=0; i<questions.length; i++) {
+        console.log(JSON.stringify(questions[i]));
+        let question = questions[i];
 
         let selection = document.createElement("input");
-        selection.id = i;
+        selection.id = question.id;
         selection.type = "radio";
         selection.name = "choices";
-        selection.value = question;
+
+        if(i==0)
+            selection.checked = true;
+
         questionDiv.appendChild(selection);
+        
+        var questionString = '  ' + question.text + ":<br>";
+        for(var k in question) {
+            let key = k;
+
+            if(key == 'id' || key == 'text')
+                continue;
+            
+            questionString += '•  ' + question[key] + '<br>';
+        }
 
         let label = document.createElement("label");
         label.for = selection.id;
-        label.innerHTML = question;
+        label.innerHTML = questionString;
         questionDiv.appendChild(label);
         questionDiv.appendChild(document.createElement('br'));
     }
 
-    document.getElementById('0').checked = true;
     document.getElementById('confirmSelection').addEventListener('click', onConfirmSelectionClicked);
 }
 
@@ -36,7 +50,7 @@ async function switchToPlayer() {
     document.getElementById('view').innerHTML = hubViewHtml;
 }
 
-function displayQuestion(questionId) {
+function displayQuestionsPlayer(questionId) {
     var questionDiv = document.getElementById('question');
 
     for(i=0; i<dummyQuestions.length; i++){
@@ -140,7 +154,7 @@ function onConfirmSelectionClicked(){
     questions = document.getElementById('questions').children;
     for(i=0; i<questions.length; i++){
         if(questions[i].tagName == 'INPUT' && questions[i].checked){
-            publishMessage(0, 'quiz/' + matchServerTopic + '/server', questions[i].value);
+            publishMessage(0, 'quiz/' + matchTopic + '/server', questions[i].value);
         }
     }
 }
