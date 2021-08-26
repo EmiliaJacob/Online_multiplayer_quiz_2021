@@ -1,5 +1,7 @@
 var timerRunning = false;
 var isGameMaster = false;
+var roundCounter = 0;
+var countdownTime = 10;
 
 async function switchToGameMaster() {
     let result = await fetch('http://localhost:3000/gameMaster');
@@ -98,26 +100,16 @@ function startCountdown(countdownTime) {
             if(countdownTime < 0) {
                 clearInterval(intervalId);
                 timerRunning = false;
+
                 if(!isGameMaster)
                     roundOver();
+
                 countdownVisualisation.innerHTML = "Round over";
             } 
             else {
                 countdownVisualisation.innerHTML = countdownTime.toString();
                 countdownTime -= 1;
             }
-        }
-    }
-}
-
-
-function onMessageArrivedHub(msg) {
-    console.log("received message: " + msg.destinationName);
-    if(msg.destinationName == "quiz/match/timer") {
-        let convertedMsg = parseInt(msg.payloadString);
-        if(convertedMsg) {
-            console.log("starting timer");
-            startCountdown(convertedMsg);
         }
     }
 }
@@ -129,6 +121,13 @@ function onConfirmSelectionClicked(){
             publishMessage(0, matchServerTopic, 'questionSelected', questions[i].value);
         }
     }
+    document.getElementById('confirmSelection').disabled = true;
+    document.getElementById('gameMasterTitle').innerHTML = 'Please wait for the other players to answer you question';
+}
+
+function enableQuestionSelectionGameMaster() {
+    document.getElementById('confirmSelection').disabled = false;
+    document.getElementById('gameMasterTitle').innerHTML = 'You are now Game-Master please select a question:';
 }
 
 function roundOver() {

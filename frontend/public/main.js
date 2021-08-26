@@ -88,12 +88,28 @@ async function onMessageArrived(msg) {
         }
     }
 
-    if(message.command == 'questionSelected') {
+    if(message.command == 'newRound') {
+        roundCounter += 1;
+        document.getElementById('countdown').innerHTML = '';
+        document.getElementById('roundCounter').innerHTML = 'Round: ' + roundCounter.toString();
+        if(isGameMaster) {
+            enableQuestionSelectionGameMaster();
+        }
+        else {
+
+        }
+    }
+
+    if(message.command == 'selectedQuestion') {
         if(isGameMaster)
             return;
 
         displayQuestionsPlayer(message.content);
         publishMessage(0, matchServerTopic , 'receivedSelectedQuestion' , username);
+    }
+
+    if(message.command == 'startRound') {
+        startCountdown(countdownTime);
     }
 
     if(message.command == 'error') {
