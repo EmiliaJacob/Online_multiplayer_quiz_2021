@@ -16,6 +16,7 @@ function displayQuestionsGameMaster() {
 
         let selection = document.createElement("input");
         selection.id = question.id;
+        selection.value = question.id;
         selection.type = "radio";
         selection.name = "choices";
 
@@ -119,46 +120,16 @@ function onMessageArrivedHub(msg) {
             startCountdown(convertedMsg);
         }
     }
-
-    if(msg.destinationName == "quiz/match/questions") {
-        var questions = null;
-
-        try {
-            questions = JSON.parse(msg.payloadString);
-        } catch (err) {
-            console.log("payload is no proper JSON");
-            console.log(msg.payloadString);
-        }
-
-        if(questions) 
-            setQuestions(questions);
-    }
-
-    if(msg.destinationName == "quiz/match/roles") {
-        if(msg.payloadString == "player"){ // TODO: Add check for username so that you know what role is yours
-            setToPlayerView();
-            subscribe("quiz/match/players", () => {
-                publishMessage(0, "quiz/match/status", "sucessfully subscribed to players");
-            })
-        }
-        if(msg.payloadString == "gameMaster") {
-            setToGameMasterView();
-            subscribe("quiz/match/gameMaster", () => {
-                publishMessage(0, "quiz/match/status", "sucessfully subscribed to gameMaster");
-            })
-        }
-    }
 }
 
 function onConfirmSelectionClicked(){
     questions = document.getElementById('questions').children;
     for(i=0; i<questions.length; i++){
         if(questions[i].tagName == 'INPUT' && questions[i].checked){
-            publishMessage(0, 'quiz/' + matchTopic + '/server', questions[i].value);
+            publishMessage(0, matchServerTopic, 'questionSelected', questions[i].value);
         }
     }
 }
-
 
 function roundOver() {
     console.log("round over");
@@ -174,5 +145,5 @@ function roundOver() {
         answer = "d"
     }
 
-    publishMessage(0, "quiz/match", "client x answered: " + answer);
+    publishMessage(0, matchServerTopic, "client x answered: " + answer);
 }
