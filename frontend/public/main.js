@@ -3,8 +3,8 @@ var matchTopic;
 var questions;
 
 var dummyQuestions = [
-    {a:2,b:3,c:4,d:5},
-    {e:6,f:7,g:8,h:9}
+    {id:"x", text:'??', a:2,b:3,c:4,d:5},
+    {id:"y", text:'bomboclaat?', a:6,b:7,b:8,d:9}
 ];
 
 window.onload = async function() { // Hub - perspective is loaded by default
@@ -77,7 +77,7 @@ async function onMessageArrived(msg) {
         publishMessage(0, 'quiz/'+matchTopic + '/server', 'questionsRecieved ' + username);
     }
 
-    if(splittedMsg[0] == 'setRoles') { // TODO: besprechen
+    if(splittedMsg[0] == 'setRoles') { 
         if(splittedMsg[1] == 'gameMaster') {
 
             await switchToGameMaster();
@@ -85,9 +85,14 @@ async function onMessageArrived(msg) {
 
         }
         else {
-
+            await switchToPlayer();
             publishMessage(0, 'quiz/' + matchTopic + '/server', 'roleSet ' + username);
         }
+    }
+
+    if(splittedMsg[0] == 'questionSelected') {
+        displayQuestion(splittedMsg[1]);
+        publishMessage(0, 'quiz/' + matchTopic + '/server', 'receivedSelectedQuestion ' + username);
     }
 }
 
@@ -95,6 +100,7 @@ async function switchToGameMaster() {
     let result = await fetch('http://localhost:3000/gameMaster');
     let gameMasterView = await result.text();
     document.getElementById('view').innerHTML = gameMasterView;
+
     var questionDiv = document.getElementById('questions');
 
     for(i=0; i<dummyQuestions.length; i++) {
@@ -120,8 +126,48 @@ async function switchToGameMaster() {
 }
 
 async function switchToPlayer() {
-    
+    let result = await fetch('http://localhost:3000/player');
+    let hubViewHtml = await result.text();
+    document.getElementById('view').innerHTML = hubViewHtml;
 }
+
+function displayQuestion(questionId) {
+    var questionDiv = document.getElementById('question');
+
+    for(i=0; i<dummyQuestions.length; i++){
+        var question = dummyQuestions[i];
+
+        if(question.id == questionId) {
+
+            document.getElementById('questionDisplay').innerHTML = question.text;
+
+            for(var k in question) {
+                let key = k;
+
+                if(key == 'id' || key == 'text')
+                    continue;
+                
+                let choice = document.createElement("input");
+                choice.id = key;
+                choice.type = "radio";
+                choice.name = "choices";
+                questionDiv.appendChild(choice);
+
+                if(key=='a')
+                    choice.checked = true;
+
+                let label = document.createElement("label");
+                label.for = choice.id;
+                label.innerHTML = key + ': ' + question[key];
+                questionDiv.appendChild(label);
+
+                let br = document.createElement("br");
+                questionDiv.appendChild(br);
+            }
+        }
+    }
+}
+
 
 async function switchToHub() {
     let result = await fetch('http://localhost:3000/hub');

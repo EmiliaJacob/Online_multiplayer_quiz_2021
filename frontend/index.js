@@ -26,10 +26,9 @@ app.get('/hub', async(req,res) => {
 })
 
 app.get('/player', (req,res) => {
-
+   res.render('player');
 });
 
 app.get('/gameMaster', (req, res) => {
    res.render('gameMaster');
 });
-
