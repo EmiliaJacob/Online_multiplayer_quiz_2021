@@ -1,5 +1,6 @@
 var username;
 var matchTopic;
+var matchServerTopic;
 var questions;
 
 var dummyQuestions = [
@@ -53,9 +54,11 @@ async function onMessageArrived(msg) {
     var message = JSON.parse(msg.payloadString);
 
     if(message.command == 'foundMatch') {
-        matchTopic = message.content; 
+        matchTopic = 'quiz/' + message.content;
+        matchServerTopic = 'quiz/'+ message.content + '/server'; 
 
         searchStatus.innerHTML = "Found a match! Waiting for you to join ..."
+        findMatchButton.style.visibility='hidden';
         stopSearchingButton.style.visibility='hidden';
         joinMatchButton.style.visibility='visible';
     }
@@ -66,120 +69,33 @@ async function onMessageArrived(msg) {
     }
 
     if(message.command == 'questions') {
-        console.log(message.content);
-        
-        try {
-            questions = JSON.parse(message.content);
-        } catch {
-            console.log('string couldnt be parsed into json');
-        }
-
-        publishMessage(0, 'quiz/'+matchTopic + '/server', 'questionsRecieved', username);
+        questions = message.content.questions;
+        console.log("recieved questions: " + JSON.stringify(questions));
+        publishMessage(0, matchServerTopic, 'questionsRecieved', username);
     }
 
     if(message.command == 'setRoles') { 
         if(message.content == 'gameMaster') {
-
+            isGameMaster = true;
             await switchToGameMaster();
-            publishMessage(0, 'quiz/' + matchTopic + '/server', 'roleSet' , username);
+            publishMessage(0, matchServerTopic , 'roleSet' , username);
 
         }
         else {
             await switchToPlayer();
-            publishMessage(0, 'quiz/' + matchTopic + '/server', 'roleSet' , username);
+            publishMessage(0, matchServerTopic, 'roleSet' , username);
         }
     }
 
     if(message.command == 'questionSelected') {
+        if(isGameMaster)
+            return;
+
         displayQuestion(message.content);
-        publishMessage(0, 'quiz/' + matchTopic + '/server', 'receivedSelectedQuestion' , username);
-    }
-}
-
-async function switchToGameMaster() {
-    let result = await fetch('http://localhost:3000/gameMaster');
-    let gameMasterView = await result.text();
-    document.getElementById('view').innerHTML = gameMasterView;
-
-    var questionDiv = document.getElementById('questions');
-
-    for(i=0; i<dummyQuestions.length; i++) {
-        console.log(JSON.stringify(dummyQuestions[i]));
-        let question = JSON.stringify(dummyQuestions[i]);
-
-        let selection = document.createElement("input");
-        selection.id = i;
-        selection.type = "radio";
-        selection.name = "choices";
-        selection.value = question;
-        questionDiv.appendChild(selection);
-
-        let label = document.createElement("label");
-        label.for = selection.id;
-        label.innerHTML = question;
-        questionDiv.appendChild(label);
-        questionDiv.appendChild(document.createElement('br'));
+        publishMessage(0, matchServerTopic , 'receivedSelectedQuestion' , username);
     }
 
-    document.getElementById('0').checked = true;
-    document.getElementById('confirmSelection').addEventListener('click', onConfirmSelectionClicked);
-}
-
-async function switchToPlayer() {
-    let result = await fetch('http://localhost:3000/player');
-    let hubViewHtml = await result.text();
-    document.getElementById('view').innerHTML = hubViewHtml;
-}
-
-function displayQuestion(questionId) {
-    var questionDiv = document.getElementById('question');
-
-    for(i=0; i<dummyQuestions.length; i++){
-        var question = dummyQuestions[i];
-
-        if(question.id == questionId) {
-
-            document.getElementById('questionDisplay').innerHTML = question.text;
-
-            for(var k in question) {
-                let key = k;
-
-                if(key == 'id' || key == 'text')
-                    continue;
-                
-                let choice = document.createElement("input");
-                choice.id = key;
-                choice.type = "radio";
-                choice.name = "choices";
-                questionDiv.appendChild(choice);
-
-                if(key=='a')
-                    choice.checked = true;
-
-                let label = document.createElement("label");
-                label.for = choice.id;
-                label.innerHTML = key + ': ' + question[key];
-                questionDiv.appendChild(label);
-
-                let br = document.createElement("br");
-                questionDiv.appendChild(br);
-            }
-        }
+    if(message.command == 'error') {
+        unsubscribe(matchServerTopic, switchToHub);
     }
-}
-
-async function switchToHub() {
-    let result = await fetch('http://localhost:3000/hub');
-    let hubViewHtml = await result.text();
-    document.getElementById('view').innerHTML = hubViewHtml;
-
-    findGameButton = document.getElementById("findGame");
-    findGameButton.addEventListener("click", onFindMatchClicked);
-    stopSearchingButton = document.getElementById("stopSearching");
-    stopSearchingButton.addEventListener("click", onStopSearchingClicked);
-    joinMatchButton = document.getElementById('joinMatch');
-    joinMatchButton.addEventListener('click', onJoinMatchClicked);
-    searchStatus = document.getElementById('status');
-
-    subscribe('quiz/joinGame/' + username, ()=>{});
 }

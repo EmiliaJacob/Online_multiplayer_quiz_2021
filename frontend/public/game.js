@@ -1,7 +1,77 @@
 var timerRunning = false;
 var isGameMaster = false;
-var currentRole;
 
+async function switchToGameMaster() {
+    let result = await fetch('http://localhost:3000/gameMaster');
+    let gameMasterView = await result.text();
+    document.getElementById('view').innerHTML = gameMasterView;
+
+    var questionDiv = document.getElementById('questions');
+
+    for(i=0; i<dummyQuestions.length; i++) {
+        console.log(JSON.stringify(dummyQuestions[i]));
+        let question = JSON.stringify(dummyQuestions[i]);
+
+        let selection = document.createElement("input");
+        selection.id = i;
+        selection.type = "radio";
+        selection.name = "choices";
+        selection.value = question;
+        questionDiv.appendChild(selection);
+
+        let label = document.createElement("label");
+        label.for = selection.id;
+        label.innerHTML = question;
+        questionDiv.appendChild(label);
+        questionDiv.appendChild(document.createElement('br'));
+    }
+
+    document.getElementById('0').checked = true;
+    document.getElementById('confirmSelection').addEventListener('click', onConfirmSelectionClicked);
+}
+
+async function switchToPlayer() {
+    let result = await fetch('http://localhost:3000/player');
+    let hubViewHtml = await result.text();
+    document.getElementById('view').innerHTML = hubViewHtml;
+}
+
+function displayQuestion(questionId) {
+    var questionDiv = document.getElementById('question');
+
+    for(i=0; i<dummyQuestions.length; i++){
+        var question = dummyQuestions[i];
+
+        if(question.id == questionId) {
+
+            document.getElementById('questionDisplay').innerHTML = question.text;
+
+            for(var k in question) {
+                let key = k;
+
+                if(key == 'id' || key == 'text')
+                    continue;
+                
+                let choice = document.createElement("input");
+                choice.id = key;
+                choice.type = "radio";
+                choice.name = "choices";
+                questionDiv.appendChild(choice);
+
+                if(key=='a')
+                    choice.checked = true;
+
+                let label = document.createElement("label");
+                label.for = choice.id;
+                label.innerHTML = key + ': ' + question[key];
+                questionDiv.appendChild(label);
+
+                let br = document.createElement("br");
+                questionDiv.appendChild(br);
+            }
+        }
+    }
+}
 
 function startCountdown(countdownTime) {
     if(!timerRunning) {
@@ -66,50 +136,15 @@ function onMessageArrivedHub(msg) {
     }
 }
 
-function setToPlayerView() {
-    var chars = "abcd";
-
-    var questionParagraph = document.getElementById("question");
-
-    var questionDisplay = document.createElement("h2");
-    questionDisplay.id = "questionDisplay";
-    questionDisplay.innerHTML = "Question: Placeholder";
-    questionParagraph.appendChild(questionDisplay);
-
-    for(i=0; i<4; i++) {
-        let choice = document.createElement("input");
-        choice.id = "answer" + chars.charAt(i);
-        choice.type = "radio";
-        choice.name = "choices";
-        questionParagraph.appendChild(choice);
-
-        let label = document.createElement("label");
-        label.for = choice.id;
-        label.id = "question" + chars.charAt(i).toUpperCase();
-        label.innerHTML = "placeholder";
-        questionParagraph.appendChild(label);
-
-        let br = document.createElement("br");
-        questionParagraph.appendChild(br);
-    }
-}
-
 function onConfirmSelectionClicked(){
     questions = document.getElementById('questions').children;
     for(i=0; i<questions.length; i++){
         if(questions[i].tagName == 'INPUT' && questions[i].checked){
-            publishMessage(0, 'quiz/' + matchTopic + '/server', questions[i].value);
+            publishMessage(0, 'quiz/' + matchServerTopic + '/server', questions[i].value);
         }
     }
 }
 
-function setQuestions(question) {
-    document.getElementById("questionDisplay").innerHTML = "Question: " + JSON.stringify(question.text);
-    document.getElementById("questionA").innerHTML = "A: " + JSON.stringify(question.a);
-    document.getElementById("questionB").innerHTML = "B: " + JSON.stringify(question.b);
-    document.getElementById("questionC").innerHTML = "C: " + JSON.stringify(question.c);
-    document.getElementById("questionD").innerHTML = "D: " + JSON.stringify(question.d);
-}
 
 function roundOver() {
     console.log("round over");
