@@ -54,10 +54,12 @@ async function switchToPlayer() {
 }
 
 function displayQuestionsPlayer(questionId) {
+    document.getElementById('playerTitle').innerHTML = 'Time to showcase your knowledge:';
+
     var questionDiv = document.getElementById('question');
 
-    for(i=0; i<dummyQuestions.length; i++){
-        var question = dummyQuestions[i];
+    for(i=0; i<questions.length; i++){
+        var question = questions[i];
 
         if(question.id == questionId) {
 
@@ -71,6 +73,7 @@ function displayQuestionsPlayer(questionId) {
                 
                 let choice = document.createElement("input");
                 choice.id = key;
+                choice.value = key;
                 choice.type = "radio";
                 choice.name = "choices";
                 questionDiv.appendChild(choice);
@@ -107,7 +110,7 @@ function startCountdown(countdownTime) {
                 countdownVisualisation.innerHTML = "Round over";
             } 
             else {
-                countdownVisualisation.innerHTML = countdownTime.toString();
+                countdownVisualisation.innerHTML = 'Time left to answer to question: ' + countdownTime.toString();
                 countdownTime -= 1;
             }
         }
@@ -131,18 +134,13 @@ function enableQuestionSelectionGameMaster() {
 }
 
 function roundOver() {
-    console.log("round over");
-
-    var answer = "none";
-    if(document.getElementById("answerA").checked) {
-        answer = "a";
-    } else if (document.getElementById("answerB").checked) {
-        answer = "b"
-    } else if (document.getElementById("answerC").checked) {
-        answer = "c"
-    } else if (document.getElementById("answerD").checked) {
-        answer = "d"
+    var choices = document.getElementById('question').children;
+    for(i=0; i<choices.length; i++){
+        if(choices[i].tagName == 'INPUT' && choices[i].checked){
+            publishMessage(0, matchServerTopic, 'answer', JSON.stringify({userName:username, answer:choices[i].value}));
+        }
     }
-
-    publishMessage(0, matchServerTopic, "client x answered: " + answer);
+    document.getElementById('playerTitle').innerHTML = 'Please wait for the Quizmaster to select the next question';
+    document.getElementById('questionDisplay').innerHTML = '';
+    document.getElementById('question').innerHTML = '';
 }
