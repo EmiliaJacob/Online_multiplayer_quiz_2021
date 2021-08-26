@@ -1,9 +1,14 @@
-function publishMessage(qos, destination, payload) {
+function publishMessage(qos, destination, command, content) {
+    var message = {
+        command: command,
+        content: content
+    };
+
     try {
-        let message = new Paho.MQTT.Message(payload);
-        message.destinationName = destination;
-        message.qos = qos;
-        client.send(message)
+        let messageMQTT = new Paho.MQTT.Message(JSON.stringify(message));
+        messageMQTT.destinationName = destination;
+        messageMQTT.qos = qos;
+        client.send(messageMQTT)
     } catch  {
         console.log("client is not connected");
     }

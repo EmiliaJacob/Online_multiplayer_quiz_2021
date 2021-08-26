@@ -50,49 +50,49 @@ function onConnectionFailure(err) {
 async function onMessageArrived(msg) {
     console.log("received message: " + msg.payloadString);
 
-    var splittedMsg = msg.payloadString.split(' ');
+    var message = JSON.parse(msg.payloadString);
 
-    if(splittedMsg[0] == 'foundMatch') {
-        matchTopic = splittedMsg[1]; 
+    if(message.command == 'foundMatch') {
+        matchTopic = message.content; 
 
         searchStatus.innerHTML = "Found a match! Waiting for you to join ..."
         stopSearchingButton.style.visibility='hidden';
         joinMatchButton.style.visibility='visible';
     }
     
-    if(splittedMsg[0] == 'gameStart') {
+    if(message.command == 'gameStart') {
         searchStatus.innerHTML = 'Game starts ...';
         console.log('game starts');
     }
 
-    if(splittedMsg[0] == 'questions') {
-        console.log(splittedMsg[1]);
+    if(message.command == 'questions') {
+        console.log(message.content);
         
         try {
-            questions = JSON.parse(splittedMsg[1]);
+            questions = JSON.parse(message.content);
         } catch {
             console.log('string couldnt be parsed into json');
         }
 
-        publishMessage(0, 'quiz/'+matchTopic + '/server', 'questionsRecieved ' + username);
+        publishMessage(0, 'quiz/'+matchTopic + '/server', 'questionsRecieved', username);
     }
 
-    if(splittedMsg[0] == 'setRoles') { 
-        if(splittedMsg[1] == 'gameMaster') {
+    if(message.command == 'setRoles') { 
+        if(message.content == 'gameMaster') {
 
             await switchToGameMaster();
-            publishMessage(0, 'quiz/' + matchTopic + '/server', 'roleSet ' + username);
+            publishMessage(0, 'quiz/' + matchTopic + '/server', 'roleSet' , username);
 
         }
         else {
             await switchToPlayer();
-            publishMessage(0, 'quiz/' + matchTopic + '/server', 'roleSet ' + username);
+            publishMessage(0, 'quiz/' + matchTopic + '/server', 'roleSet' , username);
         }
     }
 
-    if(splittedMsg[0] == 'questionSelected') {
-        displayQuestion(splittedMsg[1]);
-        publishMessage(0, 'quiz/' + matchTopic + '/server', 'receivedSelectedQuestion ' + username);
+    if(message.command == 'questionSelected') {
+        displayQuestion(message.content);
+        publishMessage(0, 'quiz/' + matchTopic + '/server', 'receivedSelectedQuestion' , username);
     }
 }
 
@@ -167,7 +167,6 @@ function displayQuestion(questionId) {
         }
     }
 }
-
 
 async function switchToHub() {
     let result = await fetch('http://localhost:3000/hub');
