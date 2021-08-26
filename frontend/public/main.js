@@ -21,8 +21,7 @@ window.onload = async function() { // Hub - perspective is loaded by default
     document.getElementById('logout').addEventListener('click', onLogoutClicked);
 }
 
-function onLogoutClicked(){
-    console.log('logout button pressed');
+function onLogoutClicked(){ 
     let cookie = document.cookie;    
     document.cookie = cookie + '; expires=Thu, 18 Dec 2013 12:00:00 UTC';
     document.location.href = 'http://localhost:3000/login';
@@ -112,7 +111,20 @@ async function onMessageArrived(msg) {
         startCountdown(countdownTime);
     }
 
+    if(message.command == 'end') {
+        let result = await fetch('http://localhost:3000/results');
+        let hubViewHtml = await result.text();
+        document.getElementById('view').innerHTML = hubViewHtml;
+
+        createRankingList(message.content);
+
+            //document.getElementById('backToHub').addEventListener('click', switchToHub);
+        unsubscribe(matchTopic, () =>{
+            document.getElementById('backToHub').addEventListener('click', switchToHub);
+        });
+    }
+
     if(message.command == 'error') {
-        unsubscribe(matchServerTopic, switchToHub);
+        unsubscribe(matchTopic, switchToHub);
     }
 }

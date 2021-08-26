@@ -4,6 +4,9 @@ var joinMatchButton;
 var searchStatus;
 
 async function switchToHub() {
+    document.getElementById('countdown').innerHTML = '';
+    document.getElementById('roundCounter').innerHTML = '';
+
     let result = await fetch('http://localhost:3000/hub');
     let hubViewHtml = await result.text();
     document.getElementById('view').innerHTML = hubViewHtml;

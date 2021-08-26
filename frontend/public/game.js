@@ -22,7 +22,7 @@ function displayQuestionsGameMaster() {
         selection.type = "radio";
         selection.name = "choices";
 
-        if(i==0)
+        if(i == 0)
             selection.checked = true;
 
         questionDiv.appendChild(selection);
@@ -110,7 +110,7 @@ function startCountdown(countdownTime) {
                 countdownVisualisation.innerHTML = "Round over";
             } 
             else {
-                countdownVisualisation.innerHTML = 'Time left to answer to question: ' + countdownTime.toString();
+                countdownVisualisation.innerHTML = 'Time left to answer the question: ' + countdownTime.toString();
                 countdownTime -= 1;
             }
         }

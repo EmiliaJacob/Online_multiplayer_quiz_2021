@@ -32,3 +32,7 @@ app.get('/player', (req,res) => {
 app.get('/gameMaster', (req, res) => {
    res.render('gameMaster');
 });
+
+app.get('/results', (req,res) => {
+    res.render('results');
+});
