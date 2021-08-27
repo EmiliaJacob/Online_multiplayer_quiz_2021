@@ -443,7 +443,7 @@ function startSession(session){
 
 	client.publish(topicNameGame + "/" + topicMatch + "/" + session.sID, JSON.stringify(questions));
 		
-	setTimeout(questionsReceivedTimer, 8000, sHandler, sID);	
+	setTimeout(questionsReceivedTimer, 8000, sHandler, session.sID);	
 	
 }	
 
