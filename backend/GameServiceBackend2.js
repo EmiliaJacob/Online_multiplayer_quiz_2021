@@ -367,17 +367,17 @@ function joinQueue(msg, matchmaking, sHandler){
 		}
 		client.subscribe(topicNameGame + "/" + topicMatch + "/" + session.sID + "/server");
 		session.resetreadySessionStart();
-		setTimeout(joinMatchTimer, 8000, session);
+		setTimeout(joinMatchTimer, 8000, sHandler, sID);
 	}	
 }
 
-function joinMatchTimer(session){
+function joinMatchTimer(sHandler,sID){
 	console.log("joinMatchTimer");
+	var session = sHandler.getSession(sID);
 	let test = session.arePlayersReady();
 	console.log("test: " + test);
 	
 	if(test==true){
-		console.log("startSession");
 		startSession(session);
 	} else {
 		sendError(session.sID);
@@ -391,7 +391,7 @@ function leaveQueue(msg, matchmaking){
 }	
 
 function joinGame(msg, sessionID, sHandler){
-	let session = sHandler.getSession(sessionID);	
+	var session = sHandler.getSession(sessionID);	
 	session.setPlayerReady(msg.content);
 	sHandler.setSession(sessionID, session);
 }	
@@ -416,12 +416,12 @@ function startSession(session){
 
 	client.publish(topicNameGame + "/" + topicMatch + "/" + session.sID, JSON.stringify(questions));
 		
-	setTimeout(questionsReceivedTimer, 8000);	
+	setTimeout(questionsReceivedTimer, 8000, sHandler, sID);	
 	
 }	
 
 
-function questionsReceivedTimer(msg, sessionID, sHandler){
+function questionsReceivedTimer(sHandler, sID){
 	var session = sHandler.getSession(sessionID);
 	if(session.questionsReceived()){
 		startRound(session);
@@ -437,24 +437,26 @@ function startRound(session){
 			content:session.players[session.master]
 		};
 		client.publish(topicNameGame + "/" + topicMatch + "/" + seession.sID, JSON.stringify(res));	
-		setTimeout(roleSetTimer, 8000, session);
+		setTimeout(roleSetTimer, 8000, sHandler, session.sID);
 }	
 
-function roleSetTimer(session){
+function roleSetTimer(sHandler, sID){
+	var session = sHandler. getSession(sID);
 	if(session.areRolesSet()){
 		let res = {
 			command:"newRound",
 			content:"-"
 		}			
 		client.publish(topicNameGame + "/" + topicMatch + "/" + session.sID, JSON.stringify(res));
-		setTimeout(questionSelectedTimer, 8000, session);
+		setTimeout(questionSelectedTimer, 8000, sHandler, sID);
 		
 	} else {
 		sendError(session.sID);
 	}	
 }	
 
-function questionSelectedTimer(session){
+function questionSelectedTimer(sHandler, sID){
+	var session = sHandler.getSession(sID);
 	if(session.isQuestionSelected()){
 		selectedQuestion();
 	} else {
@@ -475,7 +477,7 @@ function roleSet(msg, sessionID, sHandler){
 function questionSelected(msg, sessionID, sHandler){
 	var session = sHandler.getSession(sessionID);
 	session.questionSelected(msg.content);
-	sHandler.session.setSession(sessionID, session);
+	sHandler.setSession(sessionID, session);
 }	
 
 
@@ -486,12 +488,14 @@ function selectedQuestion(msg, sessionID, sHandler){
 		command:"selectedQuesiton",
 		content:"questionID"		
 	}
+	sHandler.setSession(sessionID, session);
 
 	client.publish(topicNameGame + "/" + topicMatch + "/" + session.sID, JSON.stringify(res));
-	setTimeout(selectedQuestionTimer, 8000, session);
+	setTimeout(selectedQuestionTimer, 8000, sHandler, sessionID);
 }	
 
-function selectedQuestionTimer(session){
+function selectedQuestionTimer(sHandler, sID){
+	var session = sHandler.getSession(sID);
 	if(session.arePlayersRoundQuestionReceived()){
 		startRound(session);
 	} else{
@@ -511,20 +515,22 @@ function handleAnswer(msg, sessionID, sHandler){
 	sHandler.setSession(sessionID, session);
 }	
 
-function startRound(session){
+function startRound(sHandler, sessionID){
 	let res = {
 		command:"startRound",
 		content:"-"		
 	}
 
 	client.publish(topicNameGame + "/" + topicMatch + "/" + session.sID, JSON.stringify(res));
-	setTimeout(answerTimer, 8000, session);
+	setTimeout(answerTimer, 8000, sHandler, sessionID);
 	
 }	
 
-function answerTimer(session){
+function answerTimer(sHandler, sessionID){
+	var session = sHandler.getSession(session.ID);
 	if(session.playersAnsweredYet()){
 		session.state += 1;
+		sHandler.setSession(sessionID, session);
 		isGamedone(session);
 	} else {
 		sendError(session.sID);
