@@ -167,7 +167,6 @@ class Session
 		let index = this.players.indexOf(pid);
 		if(index!=-1)
 			this.playersReady[index] = true;
-		console.log("setReady: " + this.playersReady[index]);
 	}	
 
 	
@@ -256,6 +255,11 @@ class sessionHandler
 		return this.cache.get(id);
 	}	
 	
+	setSession(sID, session)
+	{
+		this.cache.put(sID, session);	
+	}	
+	
 	
 }	
 
@@ -341,9 +345,10 @@ function sendError(sID){
 
 }
 
-function questionReceived(msg, sHandler){
+function questionReceived(msg, sessionID, sHandler){
 	let session = sHandler.getSession(sessionID);
 	session.setQuestionReceived(msg.content);
+	session.setSession(sessionID, session);
 }	
 
 //Funktion die einen Spieler in die Warteschlange einreiht und ggf. ein neues Spiel erzeugt 
@@ -388,6 +393,7 @@ function leaveQueue(msg, matchmaking){
 function joinGame(msg, sessionID, sHandler){
 	let session = sHandler.getSession(sessionID);	
 	session.setPlayerReady(msg.content);
+	session.setSession(sessionID, session);
 }	
 
 
@@ -460,6 +466,7 @@ function questionSelectedTimer(session){
 function roleSet(msg, sessionID, sHandler){
 	var session = sHandler.getSession(sessionID);
 	session.setRoleSet();	
+	session.setSession(sessionID, session);
 }	
 
 
@@ -468,6 +475,7 @@ function roleSet(msg, sessionID, sHandler){
 function questionSelected(msg, sessionID, sHandler){
 	var session = sHandler.getSession(sessionID);
 	session.questionSelected(msg.content);
+	session.setSession(sessionID, session);
 }	
 
 
@@ -494,11 +502,13 @@ function selectedQuestionTimer(session){
 function selectedQuestionReceived(msg, sessionID, sHandler){
 	var session = sHandler.getSession(sessionID);
 	session.setPlayersRoundQuestionReceived(msg.content);	
+	session.setSession(sessionID, session);
 }	
 
 function handleAnswer(msg, sessionID, sHandler){
 	var session = sHandler.getSession(sessionID);
 	session.handleAnswer(msg.answer, msg.userName);	
+	session.setSession(sessionID, session);
 }	
 
 function startRound(session){
