@@ -155,6 +155,7 @@ class Session
 	arePlayersReady()
 	{
 		for(var r in this.playersReady) {
+			console.log(r);
 			if(r==false) return false;	
 		}
 		return true;
@@ -162,7 +163,6 @@ class Session
 	
 	setPlayerReady(pid){
 		let index = this.players.indexOf(pid);
-		console.log("index:" + index);
 		if(index!=-1)
 			this.playersReady[index] = true;
 	}	
@@ -250,8 +250,6 @@ class sessionHandler
 
 	getSession(id)
 	{	
-		console.log(id);
-		console.log(this.cache.get(id));
 		return this.cache.get(id);
 	}	
 	
@@ -288,7 +286,6 @@ var connectOptions = {
 
 //interpretiet alle Anfragen der Clients
 function onMessage(topic, message) {
-	console.log("message");
 	var msg = JSON.parse(message);
 	var mode = topic.split("/")[1];
 	switch(mode){
@@ -348,7 +345,6 @@ function questionReceived(msg, sHandler){
 
 //Funktion die einen Spieler in die Warteschlange einreiht und ggf. ein neues Spiel erzeugt 
 function joinQueue(msg, matchmaking, sHandler){
-	console.log("hey");
 	var res = null;
 	var id = msg.id;
 	let r = matchmaking.addPlayer(msg.content);
@@ -359,7 +355,6 @@ function joinQueue(msg, matchmaking, sHandler){
 			"content": session.sID
 		}
 		for(let i=0; i<session.players.length; i++){
-			console.log("fsdfhkvanessa")
 			client.publish(topicNameGame + "/" + topicJoinGame + "/" + session.players[i],JSON.stringify(res));			
 		}
 		client.subscribe(topicNameGame + "/" + topicMatch + "/" + session.sID + "/server");
@@ -384,7 +379,6 @@ function leaveQueue(msg, matchmaking){
 
 function joinGame(msg, sessionID, sHandler){
 	let session = sHandler.getSession(sessionID);	
-	console.log("id:" + msg.content);
 	session.setPlayerReady(msg.content);
 }	
 
