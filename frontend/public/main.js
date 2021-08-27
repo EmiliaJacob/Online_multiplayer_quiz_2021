@@ -28,7 +28,7 @@ function onLogoutClicked(){
 }
 
 function setupMQTT() {
-    client = new Paho.MQTT.Client("localhost", 8080, "/mqtt/",username);
+    client = new Paho.MQTT.Client("localhost", 8080, "/mqtt/", username);
 
     client.connect(
         {onSuccess: onConnectionSuccess},
