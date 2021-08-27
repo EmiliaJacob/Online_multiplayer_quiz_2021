@@ -548,7 +548,7 @@ function startRound(sHandler, sessionID){
 		content:"-"		
 	}
 
-	client.publish(topicNameGame + "/" + topicMatch + "/" + sessionsID, JSON.stringify(res));
+	client.publish(topicNameGame + "/" + topicMatch + "/" + sessionID, JSON.stringify(res));
 	setTimeout(answerTimer, 8000, sHandler, sessionID);
 	
 }	
