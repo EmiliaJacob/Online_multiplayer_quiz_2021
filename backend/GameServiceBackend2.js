@@ -164,7 +164,6 @@ class Session
 		let index = this.players.indexOf(pid);
 		if(index!=-1)
 			this.playersReady[index] = true;	
-		console.log(this.players[index] + ": " + this.playersReady[index]);
 	}	
 
 	
@@ -365,7 +364,10 @@ function joinQueue(msg, matchmaking, sHandler){
 
 function joinMatchTimer(session){
 	console.log("joinMatchTimer");
-	if(session.arePlayersReady()){
+	let test = session.arePlayersReady();
+	console.log("test: " + test);
+	
+	if(test){
 		console.log("startSession");
 		startSession(session);
 	} else {
