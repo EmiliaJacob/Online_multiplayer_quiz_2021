@@ -410,9 +410,7 @@ function startSession(session){
 		command:"gameStart",
 		content:"-"
 	}	
-	command":"questions","content":{"questions":[{"id":"x","text":"bomboclaat??!","a":"option a","b":"option b","c":"option c","d":"option d"},{"id":"y","text":"is it true?","a":"option a","b":"option b","c":"option c","d":"option d"}]}}'
-	
-	
+		
 	var questions = [
 		{
 			id:1,
