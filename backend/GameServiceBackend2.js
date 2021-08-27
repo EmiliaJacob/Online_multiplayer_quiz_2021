@@ -249,12 +249,9 @@ class sessionHandler
 
 	getSession(id)
 	{	
+		console.log(id);
+		console.log(this.cache.get(id));
 		return this.cache.get(id);
-	}	
-	
-	setSession(id, session)
-	{
-		return this.cache.put(id, session);
 	}	
 	
 	
