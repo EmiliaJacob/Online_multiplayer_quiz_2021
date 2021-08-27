@@ -304,7 +304,7 @@ function onMessage(topic, message) {
 		case topicMatch:
 			var sessionID = topic.split("/")[2];
 			if(msg.command == "joining"){
-				joiningGame(msg, sessionID, sHandler);	
+				joinGame(msg, sessionID, sHandler);	
 			}
 			else if(msg.command == "questionsReceived" ){
 				questionReceived(msg, sessionID, sHandler);
