@@ -382,7 +382,7 @@ function leaveQueue(msg, matchmaking){
 }	
 
 function joinGame(msg, sessionID, sHandler){
-	let session = sHandler.getSession(session.ID);	
+	let session = sHandler.getSession(sessionID);	
 	session.setPlayerReady(msg.content);
 }	
 
