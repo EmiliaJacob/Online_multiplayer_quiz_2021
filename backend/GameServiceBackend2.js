@@ -163,10 +163,9 @@ class Session
 	setPlayerReady(pid){
 		let index = this.players.indexOf(pid);
 		if(index!=-1)
-			this.playersReady[index] = true;
-		for(var r in this.playersReady){
-			console.log(r);		
-		}	
+			this.playersReady[index] = true;	
+		}
+		console.log(this.players[index] + ": " + this.playersReady[index]);
 	}	
 
 	
