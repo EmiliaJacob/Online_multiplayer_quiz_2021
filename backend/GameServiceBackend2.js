@@ -368,6 +368,7 @@ function joinQueue(msg, matchmaking, sHandler){
 function joinMatchTimer(session){
 	console.log("joinMatchTimer");
 	if(session.arePlayersReady()){
+		console.log("startSession");
 		startSession(session);
 	} else {
 		sendError(session.sID);
