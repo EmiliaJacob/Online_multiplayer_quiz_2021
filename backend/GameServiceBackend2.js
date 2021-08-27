@@ -59,7 +59,7 @@ class Matchmaking
 //alle Informationen über eine Session werden gespeichert
 class Session
 {
-	constructor(sID, players, time, rounds, number)
+	constructor(sID, players)
 	{
 		this.sID = sID;
 		this.state = 1;
@@ -75,8 +75,6 @@ class Session
 		this.playersSetRoleReady = new Array(this.players.length);
 		this.playersQuestionsReceived = new Array(this.players.length);
 		this.playersRoundQuestionReceived = new Array(this.players.length);
-		this.timeLimit = time;
-		this.nbrQstRnd = number;
 	}	
 	
 	addPlayer(nickname, playerID)
@@ -156,7 +154,7 @@ class Session
 	
 	arePlayersReady()
 	{
-		for(var r in playersReady) {
+		for(var r in this.playersReady) {
 			if(r==false) return false;	
 		return true;
 		}
@@ -234,11 +232,11 @@ class sessionHandler
 		this.IDs = new sID();
 	}	
 	
-	createNewGame(players, time, rounds, number)
+	createNewGame(players)
 	{
 		var sID = this.IDs.getID();	
 		var playerAnswers = [];
-		var session = new Session(sID , players, time, rounds, number); 
+		var session = new Session(sID , players); 
 		session.resetreadySessionStart();
 		this.cache.put(sID, session);
 		return session;
@@ -271,10 +269,10 @@ var sHandler = new sessionHandler();
 var gameStartText = "game is starting";
 
 
-var topicNameGame = "ibsProjektQuizzApp";
+var topicNameGame = "quiz";
 var topicQueue = "queue";
 var topicJoinGame = "joinGame"
-var topicMatch = "PlayGame";
+var topicMatch = "playGame";
 
 
 var timeOut = 300000;
@@ -298,27 +296,27 @@ function onMessage(topic, message) {
 	switch(mode){
 		case topicQueue:
 			if(msg.command == "queueing")
-				joinQueue(msg, matchmaking, sessionHandler);	
+				joinQueue(msg, matchmaking, sHandler);	
 			else if(msg.command == "exiting"){
-				leaveQueue(msg, matchmaking, sessionHandler);
+				leaveQueue(msg, matchmaking, sHandler);
 			}
 			break;
 		case topicMatch:
 			var sessionID = topic.split("/")[2];
 			if(msg.command == "joining"){
-				joiningGame(msg, sessionID, sessionHandler);	
+				joiningGame(msg, sessionID, sHandler);	
 			}
 			else if(msg.command == "questionsReceived" ){
-				questionReceived(msg, sessionID, sessionHandler);
+				questionReceived(msg, sessionID, sHandler);
 			}
 			else if(msg.command == "roleSet"){
-				roleSet(msg, sessionID, sessionHandler);
+				roleSet(msg, sessionID, sHandler);
 			}
 			else if(msg.command == "questionSelected"){
-				questionSelected(msg, sessionID, sessionHandler);
+				questionSelected(msg, sessionID, sHandler);
 			}
 			else if(msg.command == "receivedSelectedQuestion"){
-				receivedSelectedQuestion(msg, sessionID, sessionHandler);
+				receivedSelectedQuestion(msg, sessionID, sHandler);
 			}	
 			
 			
@@ -328,7 +326,7 @@ function onMessage(topic, message) {
 			
 			
 			else if(msg.command == "answer"){
-				sessionHandler.handleAnswer(msg.answer, msg.player, msg.sID);
+				sHandler.handleAnswer(msg.answer, msg.player, msg.sID);
 			}
 			break;
 			
@@ -345,27 +343,28 @@ function sendError(sID){
 
 }
 
-function questionReceived(msg, sessionHandler){
-	let session = sessionHandler.getSession(sessionID);
+function questionReceived(msg, sHandler){
+	let session = sHandler.getSession(sessionID);
 	session.setQuestionReceived(msg.content);
 }	
 
 //Funktion die einen Spieler in die Warteschlange einreiht und ggf. ein neues Spiel erzeugt 
-function joinQueue(msg, matchmaking, sessionHandler){
+function joinQueue(msg, matchmaking, sHandler){
 	console.log("hey");
 	var res = null;
 	var id = msg.id;
 	let r = matchmaking.addPlayer(msg.player, msg.time, msg.rounds, msg.number);
 	if(r!=null)	{
-		var session = sessionHandler.createNewGame(r, msg.time, msg.rounds, msg.number);
+		var session = sHandler.createNewGame(r, msg.time, msg.rounds, msg.number);
 		res = {
 			"command": "foundMatch ",
 			"content": session.sID
 		}
 		for(let i=0; i<session.players.length; i++){
+			console.log("fsdfhkvanessa")
 			client.publish(topicNameGame + "/" + topicJoinGame + "/" + session.players[i],JSON.stringify(res));			
 		}
-		client.subscribe(topicNameGame + "/" + topicMatch + "/" + session.sID + "/" + server);
+		client.subscribe(topicNameGame + "/" + topicMatch + "/" + session.sID + "/server");
 		session.resetreadySessionStart();
 		setTimeout(joinMatchTimer, 5000, session);
 	}	
@@ -385,14 +384,14 @@ function leaveQueue(msg, matchmaking){
 	matchmaking.leaveQueue(msg);
 }	
 
-function joinGame(msg, sessionID, sessionHandler){
-	let session = sessionHandler.getSession(msg.content);	
+function joinGame(msg, sessionID, sHandler){
+	let session = sHandler.getSession(msg.content);	
 	session.setPlayerReady(msg.content);
 }	
 
 
-function readySession(sessionHandler, msg){
-	var session = sessionHandler.getSession(msg.sessionID);
+function readySession(sHandler, msg){
+	var session = sHandler.getSession(msg.sessionID);
 	if(session != null && session.arePlayersReady()){
 		startSession(session);
 	}else if(msg.content == true){
@@ -415,8 +414,8 @@ function startSession(session){
 }	
 
 
-function questionsReceivedTimer(msg, sessionID, sessionHandler){
-	var session = sessionHandler.getSession(sessionID);
+function questionsReceivedTimer(msg, sessionID, sHandler){
+	var session = sHandler.getSession(sessionID);
 	if(session.questionsReceived()){
 		startRound(session);
 	} else {
@@ -457,22 +456,22 @@ function questionSelectedTimer(session){
 	
 }	
 
-function roleSet(msg, sessionID, sessionHandler){
-	var session = sessionHandler.getSession(sessionID);
+function roleSet(msg, sessionID, sHandler){
+	var session = sHandler.getSession(sessionID);
 	session.setRoleSet();	
 }	
 
 
 
 
-function questionSelected(msg, sessionID, sessionHandler){
-	var session = sessionHandler.getSession(sessionID);
+function questionSelected(msg, sessionID, sHandler){
+	var session = sHandler.getSession(sessionID);
 	session.questionSelected(msg.content);
 }	
 
 
-function selectedQuestion(msg, sessionID, sessionHandler){
-	var session = sessionHandler.getSession(sessionID);
+function selectedQuestion(msg, sessionID, sHandler){
+	var session = sHandler.getSession(sessionID);
 	session.sendQuestion(msg.content);
 	let res = {
 		command:"selectedQuesiton",
@@ -491,13 +490,13 @@ function selectedQuestionTimer(session){
 	}	
 }	
 
-function selectedQuestionReceived(msg, sessionID, sessionHandler){
-	var session = sessionHandler.getSession(sessionID);
+function selectedQuestionReceived(msg, sessionID, sHandler){
+	var session = sHandler.getSession(sessionID);
 	session.setPlayersRoundQuestionReceived(msg.content);	
 }	
 
-function handleAnswer(msg, sessionID, sessionHandler){
-	var session = sessionHandler.getSession(sessionID);
+function handleAnswer(msg, sessionID, sHandler){
+	var session = sHandler.getSession(sessionID);
 	session.handleAnswer(msg.answer, msg.userName);	
 }	
 
