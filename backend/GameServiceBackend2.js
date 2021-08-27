@@ -410,6 +410,36 @@ function startSession(session){
 		command:"gameStart",
 		content:"-"
 	}	
+	command":"questions","content":{"questions":[{"id":"x","text":"bomboclaat??!","a":"option a","b":"option b","c":"option c","d":"option d"},{"id":"y","text":"is it true?","a":"option a","b":"option b","c":"option c","d":"option d"}]}}'
+	
+	
+	var questions = [
+		{
+			id:1
+			text:"Was ist 3 * 3 ?"
+			a:9
+			b:6
+			c:-9
+			d:0
+		},
+		{	
+			id:2
+			text:"Was ist 10 - 2 * 3  ?"
+			a:24
+			b:4
+			c:12
+			d:7
+		}			
+	];
+	
+	let que = {
+		command:"questions",
+		content: {
+			questions:questions 		
+		}
+	}	
+	
+	
 	
 	client.publish(topicNameGame + "/" + topicMatch + "/" + session.sID, JSON.stringify(res));
 
@@ -421,7 +451,7 @@ function startSession(session){
 
 
 function questionsReceivedTimer(sHandler, sID){
-	var session = sHandler.getSession(sessionID);
+	var session = sHandler.getSession(sID);
 	if(session.questionsReceived()){
 		startRound(session);
 	} else {
