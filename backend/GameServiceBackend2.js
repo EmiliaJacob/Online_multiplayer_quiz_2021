@@ -357,7 +357,7 @@ function joinQueue(msg, matchmaking, sHandler){
 	if(r!=null)	{
 		var session = sHandler.createNewGame(r);
 		res = {
-			"command": "foundMatch ",
+			"command": "foundMatch",
 			"content": session.sID
 		}
 		for(let i=0; i<session.players.length; i++){
