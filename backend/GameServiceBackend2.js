@@ -106,8 +106,8 @@ class Session
 	{
 		for(var r in this.playersQuestionsReceived) {
 			if(r==false) return false;	
-		return true;
 		}
+		return true;
 	}	
 	
 	setQuestionReceived(pID){
@@ -130,8 +130,8 @@ class Session
 	arePlayersRoundQuestionReceived(){
 		for(var r in this.playersRoundQuestionReceived) {
 			if(r==false) return false;	
-		return true;
 		}
+		return true;
 	}	
 
 	setRoleSet(){
@@ -148,20 +148,21 @@ class Session
 	areRolesSet(){
 		for(var r in playersSetRoleReady) {
 			if(r==false) return false;	
-		return true;
 		}
+		return true;
 	}	
 	
 	arePlayersReady()
 	{
 		for(var r in this.playersReady) {
 			if(r==false) return false;	
-		return true;
 		}
+		return true;
 	}	
 	
 	setPlayerReady(pid){
 		let index = this.players.indexOf(pid);
+		console.log("index:" + index);
 		if(index!=-1)
 			this.playersReady[index] = true;
 	}	
@@ -211,8 +212,8 @@ class Session
 	{
 		for(var r in this.playersAnsweredYet) {
 			if(r==false) return false;	
-			return true;
 		}
+		return true;
 	}	
 		
 	resetPlayersAnsweredYet(){
@@ -383,6 +384,7 @@ function leaveQueue(msg, matchmaking){
 
 function joinGame(msg, sessionID, sHandler){
 	let session = sHandler.getSession(sessionID);	
+	console.log("id:" + msg.content);
 	session.setPlayerReady(msg.content);
 }	
 
