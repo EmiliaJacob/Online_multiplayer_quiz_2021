@@ -155,7 +155,10 @@ class Session
 	arePlayersReady()
 	{
 		for(var r in this.playersReady) {
-			if(r==false) return false;	
+			console.log(r);
+			if(r!=true){ 
+				return false;
+			}	
 		}
 		return true;
 	}	
@@ -367,7 +370,7 @@ function joinMatchTimer(session){
 	let test = session.arePlayersReady();
 	console.log("test: " + test);
 	
-	if(test){
+	if(test==true){
 		console.log("startSession");
 		startSession(session);
 	} else {
