@@ -415,19 +415,19 @@ function startSession(session){
 	
 	var questions = [
 		{
-			id:1
-			text:"Was ist 3 * 3 ?"
-			a:9
-			b:6
-			c:-9
+			id:1,
+			text:"Was ist 3 * 3 ?",
+			a:9,
+			b:6,
+			c:-9,
 			d:0
 		},
 		{	
-			id:2
-			text:"Was ist 10 - 2 * 3  ?"
-			a:24
-			b:4
-			c:12
+			id:2,
+			text:"Was ist 10 - 2 * 3  ?",
+			a:24,
+			b:4,
+			c:12,
 			d:7
 		}			
 	];
