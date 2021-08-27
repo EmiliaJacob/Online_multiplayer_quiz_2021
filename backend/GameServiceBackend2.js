@@ -364,7 +364,7 @@ function joinQueue(msg, matchmaking, sHandler){
 		}
 		client.subscribe(topicNameGame + "/" + topicMatch + "/" + session.sID + "/server");
 		session.resetreadySessionStart();
-		setTimeout(joinMatchTimer, 5000, session);
+		setTimeout(joinMatchTimer, 8000, session);
 	}	
 }
 
@@ -408,7 +408,7 @@ function startSession(session){
 
 	client.publish(topicNameGame + "/" + topicMatch + "/" + session.sID, JSON.stringify(questions));
 		
-	setTimeout(questionsReceivedTimer, 5000);	
+	setTimeout(questionsReceivedTimer, 8000);	
 	
 }	
 
@@ -429,7 +429,7 @@ function startRound(session){
 			content:session.players[session.master]
 		};
 		client.publish(topicNameGame + "/" + topicMatch + "/" + seession.sID, JSON.stringify(res));	
-		setTimeout(roleSetTimer, 5000, session);
+		setTimeout(roleSetTimer, 8000, session);
 }	
 
 function roleSetTimer(session){
@@ -439,7 +439,7 @@ function roleSetTimer(session){
 			content:"-"
 		}			
 		client.publish(topicNameGame + "/" + topicMatch + "/" + session.sID, JSON.stringify(res));
-		setTimeout(questionSelectedTimer, 5000, session);
+		setTimeout(questionSelectedTimer, 8000, session);
 		
 	} else {
 		sendError(session.sID);
@@ -478,7 +478,7 @@ function selectedQuestion(msg, sessionID, sHandler){
 	}
 
 	client.publish(topicNameGame + "/" + topicMatch + "/" + session.sID, JSON.stringify(res));
-	setTimeout(selectedQuestionTimer, 5000, session);
+	setTimeout(selectedQuestionTimer, 8000, session);
 }	
 
 function selectedQuestionTimer(session){
@@ -506,7 +506,7 @@ function startRound(session){
 	}
 
 	client.publish(topicNameGame + "/" + topicMatch + "/" + session.sID, JSON.stringify(res));
-	setTimeout(answerTimer, 5000, session);
+	setTimeout(answerTimer, 8000, session);
 	
 }	
 
