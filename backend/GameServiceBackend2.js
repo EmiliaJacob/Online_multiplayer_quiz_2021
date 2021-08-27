@@ -367,7 +367,7 @@ function joinQueue(msg, matchmaking, sHandler){
 		}
 		client.subscribe(topicNameGame + "/" + topicMatch + "/" + session.sID + "/server");
 		session.resetreadySessionStart();
-		setTimeout(joinMatchTimer, 8000, sHandler, sID);
+		setTimeout(joinMatchTimer, 8000, sHandler, session.sID);
 	}	
 }
 
