@@ -155,7 +155,6 @@ class Session
 	arePlayersReady()
 	{
 		for(var r in this.playersReady) {
-			console.log(r);
 			if(r==false) return false;	
 		}
 		return true;
@@ -165,6 +164,9 @@ class Session
 		let index = this.players.indexOf(pid);
 		if(index!=-1)
 			this.playersReady[index] = true;
+		for(var r in this.playersReady){
+			console.log(r);		
+		}	
 	}	
 
 	
