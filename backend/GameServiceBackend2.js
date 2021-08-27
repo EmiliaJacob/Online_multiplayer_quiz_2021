@@ -154,7 +154,7 @@ class Session
 	
 	arePlayersReady()
 	{
-		console.log(players.Ready);
+		console.log(this.playersReady);
 		for(var r in this.playersReady) {
 			console.log("readystatus: " + r);
 			if(r!=true){ 
