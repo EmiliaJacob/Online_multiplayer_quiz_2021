@@ -155,7 +155,7 @@ class Session
 	arePlayersReady()
 	{
 		console.log(this.playersReady);
-		this.playersReady.forEach(element ==> console.log(element));
+		this.playersReady.forEach(element => console.log(element));
 		for(let i=0; i < this.playersReady; i++)
 			console.log(element);
 		return true;
