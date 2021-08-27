@@ -154,6 +154,7 @@ class Session
 	
 	arePlayersReady()
 	{
+		console.log(players.Ready);
 		for(var r in this.playersReady) {
 			console.log("readystatus: " + r);
 			if(r!=true){ 
@@ -393,7 +394,6 @@ function leaveQueue(msg, matchmaking){
 
 function joinGame(msg, sessionID, sHandler){
 	var session = sHandler.getSession(sessionID);	
-	console.log(session);
 	session.setPlayerReady(msg.content);
 	sHandler.setSession(sessionID, session);
 }	
