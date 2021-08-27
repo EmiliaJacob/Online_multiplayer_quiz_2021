@@ -68,9 +68,13 @@ class Session
 		this.playersAnswersRight = new Array(this.players.length);
 		this.playersAnsweredYet = new Array(this.players.length);
 		this.playersAnswers = new Array(this.players.length);
-		this.roundSolution = 0;
+		this.playersAnswersRound = new Array(this.players.length);
+		this.question = 0;
 		this.questionSend = false;
 		this.playersReady = new Array(this.players.length);
+		this.playersSetRoleReady = new Array(this.players.length);
+		this.playersQuestionsReceived = new Array(this.players.length);
+		this.playersRoundQuestionReceived = new Array(this.players.length);
 		this.timeLimit = time;
 		this.nbrQstRnd = number;
 	}	
@@ -95,6 +99,61 @@ class Session
 		this.playersReady.forEach(element => element=false);
 	}
 	
+	resetQuestionsReceived()
+	{
+		this.playersQuestionsReceived.forEach(element => element=false);
+	}
+
+	questionsReceived()
+	{
+		for(var r in this.playersQuestionsReceived) {
+			if(r==false) return false;	
+		return true;
+		}
+	}	
+	
+	setQuestionReceived(pID){
+		let index = this.players.indexOf(pID);
+		if(index!=-1)
+			this.playersQuestionsReceived[index] = true;
+	}
+	
+	resetPlayersRoundQuestionReceived(){
+		this.playersRoundQuestionReceived.forEach(element => element=false);
+	}	
+	
+	
+	setPlayersRoundQuestionReceived(pID){
+		let index = this.players.indexOf(pID);
+		if(index!=-1)
+			this.playersRoundQuestionReceived[index] = true;
+	}	
+	
+	arePlayersRoundQuestionReceived(){
+		for(var r in this.playersRoundQuestionReceived) {
+			if(r==false) return false;	
+		return true;
+		}
+	}	
+
+	setRoleSet(){
+		let index = this.players.indexOf(pID);
+		if(index!=-1)
+			this.playersSetRoleReady[index] = true;
+
+	}	
+	
+	resetRoleSet(){
+		this.playersSetRoleReady.forEach(element => element=false);
+	}	
+	
+	areRolesSet(){
+		for(var r in playersSetRoleReady) {
+			if(r==false) return false;	
+		return true;
+		}
+	}	
+	
 	arePlayersReady()
 	{
 		for(var r in playersReady) {
@@ -103,31 +162,28 @@ class Session
 		}
 	}	
 	
-	setPlayerReady(ready, pid){
-	if(ready==false)		
-		return;
-	let index = this.players.indexOf(pid);
-	if(index!=-1)
-		this.playersReady[index] = true;
+	setPlayerReady(pid){
+		let index = this.players.indexOf(pid);
+		if(index!=-1)
+			this.playersReady[index] = true;
 	}	
 
 	
-	changeQuizzMaster()
-	{
-		this.master+=1;
-		this.master%=3;
-	}
+	checkMaster(){
+		let dummy = Math.floor((this.state-1)/3) + 1;		
+		if(dummy!=this.master){
+			this.master = dummy;
+			return true 
+		}
+		return false;
+	}	
 	
 	handleAnswer(answer, player)
 	{
 		for(let i=0; i<this.players.length; i++){
 			if(this.players[i]==player && this.playersAnsweredYet[i]==false){
 				this.playersAnsweredYet[i] = true;
-				if(everyoneAnswered()==true && this.state > this.nbrQstRnd * this.players.length){
-					//Auswertung der Ergebnisse 
-					
-					
-				} else if(this.playerAnswers[i].length == 0){
+				if(this.playerAnswers[i].length == 0){
 					let a = new Array(1);
 					a[0] = answer;
 					this.playerAnswers[i] = a;
@@ -142,41 +198,28 @@ class Session
 		}	
 	}	
 	
-	sendQuestion(qID)
-	{
-		for(let i=0; i<questions.length; i++){
-			if(questions[i].uid == qID){
-				for(let j=0; j<this.playersAnswersThisRound.length; j++){
-					this.playersAnswersThisRound[j] = "-"
-					this.playersAnsweredYet[j] = false; 
-				}	
-				
-				let res = questions[i];
-				client.publish(topicNameGame + "/" + topicPlayGame + "/" + this.sID, JSON.stringify(res));
-				setTimeout(answerTimer(this.sID) ,this.timeLimit * 1000);
-				return;
-			}	
-		}	
-	}		
 	
-	answerTimer(sID){
-		res = {
-			"over":true	
-		}	
-		client.publish(topicNewGame + "/" + topicPlayGame + "/" + sID, JSON.stringify(res));
-		this.state += 1;
-
+	questionSelected(question)
+	{
+		this.question = question;
 	}	
-
-	everyoneAnswered(){
+	
+	isQuestionSelected()
+	{
+		return this.question != 0;
+	}	
+		
+	everyoneAnswered()
+	{
 		for(var r in this.playersAnsweredYet) {
 			if(r==false) return false;	
 			return true;
 		}
 	}	
 		
-	
-	
+	resetPlayersAnsweredYet(){
+		this.playersAnsweredYet.forEach(element => element = false);
+	}	
 		
 }
 
@@ -216,19 +259,6 @@ class sessionHandler
 		return this.cache.put(id, session);
 	}	
 	
-	handleAnswer(answer, player, sID)
-	{
-		var session = this.cache.get(sID);
-		session.handleAnswer(answer, player);
-	}	
-	
-	sendQuestion(qID, sID, master)
-	{
-		var session = this.cache.get(sID);
-		if(session.questionSend==false && master == session.master)
-			session.sendQuestion(qID);	
-		session.questionSend = true;	
-	}	
 	
 }	
 
@@ -242,10 +272,9 @@ var gameStartText = "game is starting";
 
 
 var topicNameGame = "ibsProjektQuizzApp";
-var topicJoinGame = "JoinGame";
-var topicNewGame = "NewGame";
-var topicAcceptGame = "AcceptGame";
-var topicPlayGame = "PlayGame";
+var topicQueue = "queue";
+var topicJoinGame = "joinGame"
+var topicMatch = "PlayGame";
 
 
 var timeOut = 300000;
@@ -267,21 +296,38 @@ function onMessage(topic, message) {
 	var msg = JSON.parse(message);
 	var mode = topic.split("/")[1];
 	switch(mode){
-		case "JoinGame":
-			if(msg.type == "join")
+		case topicQueue:
+			if(msg.command == "queueing")
 				joinQueue(msg, matchmaking, sessionHandler);	
-			else if(topic.split("/")[1]==topicPlayGame && msg.type == "ready"){
-				readySession();
-			}	
-			else{
-				matchmaking.leaveQueue(msg.player);
-			}	
-			break;
-		case topicPlayGame:
-			if(msg.type == "question" ){
-				sessionHandler.sendQuestion(msg.question, msg.sID, msg.master);
+			else if(msg.command == "exiting"){
+				leaveQueue(msg, matchmaking, sessionHandler);
 			}
-			else if(msg.type == "answer"){
+			break;
+		case topicMatch:
+			var sessionID = topic.split("/")[2];
+			if(msg.command == "joining"){
+				joiningGame(msg, sessionID, sessionHandler);	
+			}
+			else if(msg.command == "questionsReceived" ){
+				questionReceived(msg, sessionID, sessionHandler);
+			}
+			else if(msg.command == "roleSet"){
+				roleSet(msg, sessionID, sessionHandler);
+			}
+			else if(msg.command == "questionSelected"){
+				questionSelected(msg, sessionID, sessionHandler);
+			}
+			else if(msg.command == "receivedSelectedQuestion"){
+				receivedSelectedQuestion(msg, sessionID, sessionHandler);
+			}	
+			
+			
+			
+			
+			
+			
+			
+			else if(msg.command == "answer"){
 				sessionHandler.handleAnswer(msg.answer, msg.player, msg.sID);
 			}
 			break;
@@ -289,28 +335,60 @@ function onMessage(topic, message) {
 	}	
 }
 
+function sendError(sID){
+	res = {
+		command:"error",
+		content:"-"
+	}
+	
+	client.publish(topicNameGame + "/" + topicMatch + "/" + sID, JSON.stringify(res));
+
+}
+
+function questionReceived(msg, sessionHandler){
+	let session = sessionHandler.getSession(sessionID);
+	session.setQuestionReceived(msg.content);
+}	
+
 //Funktion die einen Spieler in die Warteschlange einreiht und ggf. ein neues Spiel erzeugt 
 function joinQueue(msg, matchmaking, sessionHandler){
 	console.log("hey");
 	var res = null;
 	var id = msg.id;
 	let r = matchmaking.addPlayer(msg.player, msg.time, msg.rounds, msg.number);
-	if(r==null){
+	if(r!=null)	{
+		var session = sessionHandler.createNewGame(r, msg.time, msg.rounds, msg.number);
 		res = {
-			"sID":"-"	
-		}
-		client.publish(topicJoinGame, JSON.stringify(res));	
-	} else {
-		var session = sHandler.createNewGame(r, msg.time, msg.rounds, msg.number);
-		res = {
-			"players":r,
-			"sID":session.sID
+			"command": "foundMatch ",
+			"content": session.sID
 		}
 		for(let i=0; i<session.players.length; i++){
 			client.publish(topicNameGame + "/" + topicJoinGame + "/" + session.players[i],JSON.stringify(res));			
-		}	
+		}
+		client.subscribe(topicNameGame + "/" + topicMatch + "/" + session.sID + "/" + server);
+		session.resetreadySessionStart();
+		setTimeout(joinMatchTimer, 5000, session);
 	}	
 }
+
+function joinMatchTimer(session){
+	if(session.arePlayersReady()){
+		startSession(session);
+	} else {
+		sendError(session.sID);
+	}	
+}	
+
+
+
+function leaveQueue(msg, matchmaking){
+	matchmaking.leaveQueue(msg);
+}	
+
+function joinGame(msg, sessionID, sessionHandler){
+	let session = sessionHandler.getSession(msg.content);	
+	session.setPlayerReady(msg.content);
+}	
 
 
 function readySession(sessionHandler, msg){
@@ -323,15 +401,138 @@ function readySession(sessionHandler, msg){
 }
 
 function startSession(session){
-	client.subscribe(topicNameGame + topicPlayGame + "/" + session.sID);	
-	let pos = Math.floor(Math.random() * session.players.length);
-	session.master = pos;
-	res = {
-		type:"start",
-		content:pos
-	}		
-	client.publish(topicNameGame + "/" + topicPlayGame, msg);
+	let res = {
+		command:"gameStart",
+		content:"-"
+	}	
+	
+	client.publish(topicNameGame + "/" + topicMatch + "/" + session.sID, JSON.stringify(res));
+
+	client.publish(topicNameGame + "/" + topicMatch + "/" + session.sID, JSON.stringify(questions));
+		
+	setTimeout(questionsReceivedTimer, 5000);	
+	
 }	
+
+
+function questionsReceivedTimer(msg, sessionID, sessionHandler){
+	var session = sessionHandler.getSession(sessionID);
+	if(session.questionsReceived()){
+		startRound(session);
+	} else {
+		
+	}	
+}	
+
+
+function startRound(session){
+		res = {
+			command:"setGameMaster",
+			content:session.players[session.master];
+		};
+		client.publish(topicNameGame + "/" + topicMatch + "/" + seession.sID, JSON.stringify(res));	
+		setTimeout(roleSetTimer, 5000, session);
+}	
+
+function roleSetTimer(session){
+	if(session.areRolesSet()){
+		let res = {
+			command:"newRound",
+			content:"-"
+		}			
+		client.publish(topicNameGame + "/" + topicMatch + "/" + session.sID, JSON.stringify(res));
+		setTimeout(questionSelectedTimer, 5000, session);
+		
+	} else {
+		sendError(session.sID);
+	}	
+}	
+
+function questionSelectedTimer(session){
+	if(session.isQuestionSelected()){
+		selectedQuestion();
+	} else {
+		sendError(session.sID);
+	}
+	
+}	
+
+function roleSet(msg, sessionID, sessionHandler){
+	var session = sessionHandler.getSession(sessionID);
+	session.setRoleSet();	
+}	
+
+
+
+
+function questionSelected(msg, sessionID, sessionHandler){
+	var session = sessionHandler.getSession(sessionID);
+	session.questionSelected(msg.content);
+}	
+
+
+function selectedQuestion(msg, sessionID, sessionHandler){
+	var session = sessionHandler.getSession(sessionID);
+	session.sendQuestion(msg.content);
+	let res = {
+		command:"selectedQuesiton",
+		content:"questionID"		
+	}
+
+	client.publish(topicNameGame + "/" + topicMatch + "/" + session.sID, JSON.stringify(res));
+	setTimeout(selectedQuestionTimer, 5000, session);
+}	
+
+function selectedQuestionTimer(session){
+	if(session.arePlayersRoundQuestionReceived()){
+		startRound(session);
+	} else{
+		sendError(session.sID);	
+	}	
+}	
+
+function selectedQuestionReceived(msg, sessionID, sessionHandler){
+	var session = sessionHandler.getSession(sessionID);
+	session.setPlayersRoundQuestionReceived(msg.content);	
+}	
+
+function handleAnswer(msg, sessionID, sessionHandler){
+	var session = sessionHandler.getSession(sessionID);
+	session.handleAnswer(msg.answer, msg.userName);	
+}	
+
+function startRound(session){
+	let res = {
+		command:"startRound",
+		content:"-"		
+	}
+
+	client.publish(topicNameGame + "/" + topicMatch + "/" + session.sID, JSON.stringify(res));
+	setTimeout(answerTimer, 5000, session);
+	
+}	
+
+function answerTimer(session){
+	if(session.playersAnsweredYet()){
+		session.state += 1;
+		isGamedone(session);
+	} else {
+		sendError(session.sID);
+	}		
+}	
+
+function isGamedone(session){
+	if(session.state > session.nbrQstRnd * this.players.length){
+		endSession();	
+	} else {
+		resetFlags(session);
+		
+	}	
+	
+}	
+
+
+
 
 function endSession(session){
 	
@@ -372,8 +573,7 @@ function getQuestions(questions){
 	.on("connect", function() {
 		console.log("connected");
 		client.on('message', onMessage);
-		client.subscribe("ibsProjektQuizzApp/JoinGame");
-		client.subscribe("ibsProjektQuizzApp/CreatingGame");
+		client.subscribe(topicNameGame + "/" + topicQueue);
 		}
 	)
 	//getQuestions(questions);
