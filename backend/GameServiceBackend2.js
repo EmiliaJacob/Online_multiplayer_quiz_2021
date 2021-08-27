@@ -303,6 +303,7 @@ function onMessage(topic, message) {
 				leaveQueue(msg, matchmaking, sessionHandler);
 			}
 			break;
+<<<<<<< HEAD:gameService/GameServiceBackend2.js
 		case topicMatch:
 			var sessionID = topic.split("/")[2];
 			if(msg.command == "joining"){
@@ -319,6 +320,16 @@ function onMessage(topic, message) {
 			}
 			else if(msg.command == "receivedSelectedQuestion"){
 				receivedSelectedQuestion(msg, sessionID, sessionHandler);
+=======
+		case topicAcceptGame:
+			readySessionStart();
+		case topicPlayGame:
+			if(topic.split("/")[1]==topicPlayGame && msg.type == "question" ){
+				sessionHandler.sendQuestion(msg.id, msg.sID);
+			}
+			else if(topic.split("/")[1]==topicPlayGame && msg.type == "answer"){
+				sessionHandler.setAnswer(msg.answer, msg.player, msg.sID);
+>>>>>>> frontend:backend/GameServiceBackend2.js
 			}	
 			
 			
@@ -401,6 +412,7 @@ function readySession(sessionHandler, msg){
 }
 
 function startSession(session){
+<<<<<<< HEAD:gameService/GameServiceBackend2.js
 	let res = {
 		command:"gameStart",
 		content:"-"
@@ -518,6 +530,14 @@ function answerTimer(session){
 		isGamedone(session);
 	} else {
 		sendError(session.sID);
+=======
+	client.subscribe(topicNameGame + topicPlayGame + "/" + session.sID)	
+	let pos = Math.floor(Math.random() * session.players.length);
+	session.master = pos;
+	msg = {
+		res:gameStartText,
+		master:pos
+>>>>>>> frontend:backend/GameServiceBackend2.js
 	}		
 }	
 

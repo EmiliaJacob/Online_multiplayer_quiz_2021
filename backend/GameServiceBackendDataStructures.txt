@@ -1,0 +1,16 @@
+
+
+
+Standard Mqtt Message:
+	{
+		"player":"Id des publishers",
+		"":""s
+	
+	
+	
+	
+	
+	
+	
+	
+	}

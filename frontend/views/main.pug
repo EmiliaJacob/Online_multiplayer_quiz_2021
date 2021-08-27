@@ -1,0 +1,18 @@
+html
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript")
+    script(src="http://localhost:3000/static/mqttHelpers.js")
+    script(src="http://localhost:3000/static/authorization.js")
+    script(src="http://localhost:3000/static/main.js")
+    script(src="http://localhost:3000/static/hub.js")
+    script(src="http://localhost:3000/static/game.js")
+    script(src="http://localhost:3000/static/results.js")
+
+    head
+    body
+        p#username 
+        button(type="button")#logout Logout
+        hr
+        div#gameStats
+            p#countdown 
+            p#roundCounter
+        div#view

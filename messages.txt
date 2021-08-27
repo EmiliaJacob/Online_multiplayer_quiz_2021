@@ -1,0 +1,8 @@
+mosquitto_pub -t quiz/joinGame/felix -m '{"command":"foundMatch", "content":"abc"}'
+mosquitto_pub -t quiz/abc -m '{"command":"gameStart", "content":"empty"}'
+mosquitto_pub -t quiz/abc -m '{"command":"questions","content":{"questions":[{"id":"x","text":"bomboclaat??!","a":"option a","b":"option b","c":"option c","d":"option d"},{"id":"y","text":"is it true?","a":"option a","b":"option b","c":"option c","d":"option d"}]}}'
+mosquitto_pub -t quiz/abc -m '{"command":"setGameMaster","content":"felix"}'
+mosquitto_pub -t quiz/abc -m '{"command":"newRound","content":"empty"}'
+mosquitto_pub -t quiz/abc -m '{"command":"selectedQuestion","content":"x"}'
+mosquitto_pub -t quiz/abc -m '{"command":"startRound","content":"empty"}'
+mosquitto_pub -t quiz/abc -m '{"command":"end","content":{"felix":3,"alex":4,"vanessa":5}}'
