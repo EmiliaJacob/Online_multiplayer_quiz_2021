@@ -76,6 +76,7 @@ app.post('/login', async (req,res) => { // TODO: Automatically redirect to 'regi
                     res.json({response: "wrong pw"});
             }
         });
+		
 });
 
 app.post('/checkToken', (req,res) => {
@@ -116,7 +117,7 @@ async function getUserFromDB (userName) {
     };
 
     var queryResult = await couch.mango("users", mangoQuery, {});
-
+		
     if(queryResult.data.docs.length == 0) 
         return null;
     else

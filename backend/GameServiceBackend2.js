@@ -353,9 +353,9 @@ function joinQueue(msg, matchmaking, sHandler){
 	console.log("hey");
 	var res = null;
 	var id = msg.id;
-	let r = matchmaking.addPlayer(msg.player, msg.time, msg.rounds, msg.number);
+	let r = matchmaking.addPlayer(msg.content);
 	if(r!=null)	{
-		var session = sHandler.createNewGame(r, msg.time, msg.rounds, msg.number);
+		var session = sHandler.createNewGame(r);
 		res = {
 			"command": "foundMatch ",
 			"content": session.sID
@@ -521,7 +521,7 @@ function answerTimer(session){
 }	
 
 function isGamedone(session){
-	if(session.state > session.nbrQstRnd * this.players.length){
+	if(session.state > 3 * this.players.length){
 		endSession();	
 	} else {
 		resetFlags(session);

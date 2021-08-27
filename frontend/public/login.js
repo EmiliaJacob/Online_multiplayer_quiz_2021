@@ -67,7 +67,10 @@ async function register() {
     });
 
     var responseJson = await response.json();
-    if(responseJson.response == "userName taken") {
+    
+	console.log(responseJson);
+	
+	if(responseJson.response == "userName taken") {
         userNameLabel.innerHTML = 'Username - Username already taken'
         userNameLabel.style.color = '#ff0000';
     }
