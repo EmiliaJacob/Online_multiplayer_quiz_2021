@@ -164,7 +164,6 @@ class Session
 		let index = this.players.indexOf(pid);
 		if(index!=-1)
 			this.playersReady[index] = true;	
-		}
 		console.log(this.players[index] + ": " + this.playersReady[index]);
 	}	
 
