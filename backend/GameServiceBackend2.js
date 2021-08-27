@@ -374,8 +374,9 @@ function joinQueue(msg, matchmaking, sHandler){
 function joinMatchTimer(sHandler,sID){
 	console.log("joinMatchTimer");
 	var session = sHandler.getSession(sID);
+	console.log(session);
 	let test = session.arePlayersReady();
-	console.log("test: " + test);
+	//console.log("test: " + test);
 	
 	if(test==true){
 		startSession(session);
@@ -392,6 +393,7 @@ function leaveQueue(msg, matchmaking){
 
 function joinGame(msg, sessionID, sHandler){
 	var session = sHandler.getSession(sessionID);	
+	console.log(session);
 	session.setPlayerReady(msg.content);
 	sHandler.setSession(sessionID, session);
 }	
