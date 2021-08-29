@@ -136,7 +136,7 @@ function roundOver() {
     var choices = document.getElementById('question').children;
     for(i=0; i<choices.length; i++){
         if(choices[i].tagName == 'INPUT' && choices[i].checked){
-            publishMessage(0, matchServerTopic, 'answer', JSON.stringify({userName:username, answer:choices[i].value}));
+            publishMessage(0, matchServerTopic, 'answer', {userName:username, answer:choices[i].value});
         }
     }
     document.getElementById('playerTitle').innerHTML = 'Please wait for the Quizmaster to select the next question';

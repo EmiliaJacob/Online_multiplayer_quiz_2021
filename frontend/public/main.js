@@ -120,6 +120,7 @@ async function onMessageArrived(msg) {
 
         createRankingList(message.content);
 
+        roundCounter = 0;
             //document.getElementById('backToHub').addEventListener('click', switchToHub);
         unsubscribe(matchTopic, () =>{
             document.getElementById('backToHub').addEventListener('click', switchToHub);
