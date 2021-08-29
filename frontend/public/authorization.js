@@ -33,6 +33,6 @@ async function authorize() {
     }
 
     usernameString = JSON.stringify(responseJson.user.userName);
-    username = usernameString.substring(3, usernameString.length - 3); // IDK why this is neccessary
+    username = usernameString.substring(3, usernameString.length - 3);
     return username;
 }

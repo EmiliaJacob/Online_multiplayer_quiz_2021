@@ -2,6 +2,7 @@ var username;
 var matchTopic;
 var matchServerTopic;
 var questions;
+var client;
 
 var dummyQuestions = [
     {id:"x", text:'??', a:2,b:3,c:4,d:5},
@@ -82,6 +83,7 @@ async function onMessageArrived(msg) {
 
         }
         else {
+            isGameMaster = false;
             await switchToPlayer();
             publishMessage(0, matchServerTopic, 'roleSet' , username);
         }

@@ -20,7 +20,7 @@ async function login() {
     if(!input)
         return;
 
-    var response = await fetch('http://localhost:3001/login', { // TODO: Add error handling
+    var response = await fetch('http://localhost:3001/login', { 
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -55,7 +55,7 @@ async function register() {
     if(!input)
         return;
 
-    var response = await fetch('http://localhost:3001/register', { // TODO: Add error handling
+    var response = await fetch('http://localhost:3001/register', { 
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

@@ -49,14 +49,16 @@ function displayQuestionsGameMaster() {
 
 async function switchToPlayer() {
     let result = await fetch('http://localhost:3000/player');
-    let hubViewHtml = await result.text();
-    document.getElementById('view').innerHTML = hubViewHtml;
+    let playerViewHtml = await result.text();
+    document.getElementById('view').innerHTML = playerViewHtml;
 }
 
 function displayQuestionsPlayer(questionId) {
     document.getElementById('playerTitle').innerHTML = 'Time to showcase your knowledge:';
 
     var questionDiv = document.getElementById('question');
+
+    //console.log("QUESTIONS: " + JSON.stringify(questions));
 
     for(i=0; i<questions.length; i++){
         var question = questions[i];
