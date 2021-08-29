@@ -13,7 +13,6 @@ function displayQuestionsGameMaster() {
     var questionDiv = document.getElementById('questions');
 
     for(i=0; i<questions.length; i++) {
-        console.log(JSON.stringify(questions[i]));
         let question = questions[i];
 
         let selection = document.createElement("input");
@@ -57,8 +56,6 @@ function displayQuestionsPlayer(questionId) {
     document.getElementById('playerTitle').innerHTML = 'Time to showcase your knowledge:';
 
     var questionDiv = document.getElementById('question');
-
-    //console.log("QUESTIONS: " + JSON.stringify(questions));
 
     for(i=0; i<questions.length; i++){
         var question = questions[i];
@@ -120,14 +117,14 @@ function startCountdown(countdownTime) {
 }
 
 function onConfirmSelectionClicked(){
-    questions = document.getElementById('questions').children;
-    for(i=0; i<questions.length; i++){
-        if(questions[i].tagName == 'INPUT' && questions[i].checked){
-            publishMessage(0, matchServerTopic, 'questionSelected', questions[i].value);
+    var questionInputs = document.getElementById('questions').children;
+    for(i=0; i<questionInputs.length; i++){
+        if(questionInputs[i].tagName == 'INPUT' && questionInputs[i].checked){
+            publishMessage(0, matchServerTopic, 'questionSelected', questionInputs[i].value);
         }
     }
     document.getElementById('confirmSelection').disabled = true;
-    document.getElementById('gameMasterTitle').innerHTML = 'Please wait for the other players to answer you question';
+    document.getElementById('gameMasterTitle').innerHTML = 'Please wait for the other players to answer your question';
 }
 
 function enableQuestionSelectionGameMaster() {
