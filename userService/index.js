@@ -1,6 +1,6 @@
-const { json } = require('express'); // TODO: What is this?
+const { json } = require('express'); 
 const express = require('express');
-const bodyParser = require('body-parser'); // TODO: stop using bodyparser
+const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const saltRounds = 10;
 const app= express();
@@ -30,7 +30,7 @@ const couch = new NodeCouchDb({ // See the default values at https://www.npmjs.c
         }
 });
 
-app.post('/register',  async (req,res) => { // TODO: You can also make (req,res) async. This might help in refactoring
+app.post('/register',  async (req,res) => { 
     if(!req.body.userName || !req.body.password) { // Check if required fields are part of request
         res.json({response:"unexpexted body"});
         return;
@@ -46,7 +46,7 @@ app.post('/register',  async (req,res) => { // TODO: You can also make (req,res)
         res.json({response:"userName taken"});
 });
 	 
-app.post('/login', async (req,res) => { // TODO: Automatically redirect to 'register' if user doesn't exist
+app.post('/login', async (req,res) => { 
     // compare pwds: 
         console.log("new login request: " + JSON.stringify(req.body));
         if(!req.body.password || !req.body.userName) { // Check if correct JSON is sent
@@ -64,7 +64,7 @@ app.post('/login', async (req,res) => { // TODO: Automatically redirect to 'regi
         bcrypt.compare(req.body.password, user.password, function(err, result) {
             if(err) {
                 console.log(result);
-                res.json({response: "error"}); // TODO: make one central error return
+                res.json({response: "error"}); 
             }
             else {
                 if(result == true) {
@@ -130,7 +130,7 @@ async function addUser(userName, password) { // Create new user in DB
     var hashedPw = await bcrypt.hash(password, salt);
 
     await couch.insert("users", {
-        _id: uuid[0], // TODO: is ID necessary? 
+        _id: uuid[0], 
         userName: JSON.stringify(userName),
         password: hashedPw
     })

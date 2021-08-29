@@ -4,11 +4,6 @@ var matchServerTopic;
 var questions;
 var client;
 
-var dummyQuestions = [
-    {id:"x", text:'??', a:2,b:3,c:4,d:5},
-    {id:"y", text:'bomboclaat?', a:6,b:7,b:8,d:9}
-];
-
 window.onload = async function() { // Hub - perspective is loaded by default
     username = await authorize(); 
 
@@ -95,9 +90,6 @@ async function onMessageArrived(msg) {
         document.getElementById('roundCounter').innerHTML = 'Round: ' + roundCounter.toString();
         if(isGameMaster) {
             enableQuestionSelectionGameMaster();
-        }
-        else {
-
         }
     }
 
